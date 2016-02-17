@@ -1,0 +1,11 @@
+{
+    "config": "script/conf/config.js",
+    "data": "script/util/data.js",
+    "escape-html": "script/util/escape-html.js",
+    "format": "script/util/format.js",
+    "helper": "script/util/helper.js",
+    "os": "script/util/os.js",
+    "random": "script/util/random.js",
+    "network": "script/util/network.js",
+    "toast": "script/util/toast.js"
+}

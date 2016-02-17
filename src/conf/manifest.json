@@ -1,0 +1,51 @@
+{
+    "manifest_version": 2,
+    "minimum_chrome_version": "34",
+    "name": "字段配置从package.json中读取",
+    "version": "字段配置从package.json中读取",
+    "description": "页面行为录制，页面性能监控。",
+    "icons": {
+        "16": "image/icon/app-16.png",
+        "32": "image/icon/app-32.png",
+        "48": "image/icon/app-48.png",
+        "128": "image/icon/app-128.png"
+    },
+    "browser_action": {
+        "default_icon": "image/icon/app-128.png",
+        "default_title": "字段配置从package.json中读取"
+    },
+    "homepage_url": "字段配置从package.json中读取",
+    "options_page": "page/options/main.html",
+    "author": "字段配置从package.json中读取",
+    "background": {
+        "page": "page/background/main.html",
+        "persistent": true
+    },
+    "permissions": [
+        "alarms",
+        "webNavigation",
+        "tabs",
+        "contextMenus",
+        "debugger",
+        "notifications",
+        "*://*/",
+        "webRequest",
+        "webRequestBlocking",
+        "<all_urls>",
+        "http://*/",
+        "https://*/"
+    ],
+    "web_accessible_resources": [
+        "*"
+    ],
+    "devtools_page": "page/dashboard/loader.html",
+    "commands": {
+        "detect-screenshot": {
+            "suggested_key": {
+                "default": "Ctrl+Shift+3"
+            },
+            "description": "检测截图",
+            "global": true
+        }
+    }
+}

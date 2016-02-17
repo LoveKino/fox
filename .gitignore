@@ -1,0 +1,14 @@
+/dist
+.idea/
+*.iml
+coverage/
+node_modules/
+
+server/data/*
+
+.DS_Store
+*.db
+*.bak
+*.tmp
+*.cmd
+~*
