@@ -1,0 +1,26 @@
+
+.pane-item {
+  .panel {
+    border-color: fadeout(@inset-panel-border-color, 30%);
+  }
+}
+
+fox-pane-container {
+  fox-pane {
+    background-color: lighten(@app-background-color, 4%);
+
+    &:focus {
+      background-color: @app-background-color;
+    }
+  }
+
+  fox-pane-axis.horizontal > * {
+    border-right: 1px solid @pane-item-border-color;
+    &:last-child { border-right: none; }
+  }
+
+  fox-pane-axis.vertical > * {
+    border-bottom: 1px solid @pane-item-border-color;
+    &:last-child { border-bottom: none; }
+  }
+}

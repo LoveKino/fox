@@ -1,0 +1,214 @@
+.react-wrap{
+    width: inherit;
+    height: inherit;
+    position: inherit;
+    pointer-events: inherit;
+}
+
+
+#welcome-logo-fox *, #welcome-logo-fox *:before, #welcome-logo-fox *:after{
+    box-sizing: border-box;
+}
+
+#welcome-logo-fox.fox-wrapper {
+    zoom: 0.25;
+    -webkit-transform: translate(70%, 0%);
+    transform: translate(70%, 0%);
+    background: #442221;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    padding: 50px;
+    background: linear-gradient(124deg, #F7A000, #F78400, #F77700, #F76700, #E35C00, #572E00);
+    -webkit-animation: rainbow 15s ease infinite;
+    -z-animation: rainbow 15s ease infinite;
+    -o-animation: rainbow 15s ease infinite;
+    animation: rainbow 15s ease infinite;
+}
+
+#welcome-logo-fox .fox-face{
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 90px 90px 32px 32px;
+    border-color: #ffac34 #ff8c35 transparent transparent;
+    -webkit-transform: rotate(-45deg);
+    transform: rotate(-45deg);
+    position: relative;
+    z-index: 4;
+    left: 60px;
+    top: 10px;
+}
+#welcome-logo-fox .fox-face:before {
+    display: block;
+    content: "";
+    position: absolute;
+    top: -48px;
+    left: -16px;
+    border-style: solid;
+    border-width: 64px 64px 0 0;
+    border-color: #ffac34 #ff8c35 transparent transparent;
+}
+#welcome-logo-fox .fox-face:after {
+    display: block;
+    content: "";
+    position: absolute;
+    top: 4px;
+    left: -18px;
+    border-style: solid;
+    border-width: 0 0 14px 14px;
+    border-color: transparent transparent #e7ddce #fff5e5;
+}
+
+#welcome-logo-fox .fox-ears {
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 29px 86px 86px;
+    border-color: transparent #ffac34 transparent #ff8c35;
+    position: absolute;
+    top: 7px;
+    left: 85px;
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+}
+#welcome-logo-fox .fox-ears:before {
+    display: block;
+    content: "";
+    position: absolute;
+    border-width: 58px 16px;
+    border-style: solid;
+    border-color: transparent #d6601f;
+    width: 172px;
+    top: -30px;
+    left: -86px;
+}
+#welcome-logo-fox .fox-ears:after {
+    display: block;
+    content: "";
+    position: absolute;
+    border-width: 40px 12px 0;
+    border-style: solid;
+    border-color: #e7ddce transparent transparent;
+    bottom: -122px;
+    left: -64px;
+    width: 120px;
+}
+
+#welcome-logo-fox .fox-nose {
+    width: 0;
+    height: 0;
+    top: -14px;
+    left: 68px;
+    border-style: solid;
+    border-width: 20px 48px 0;
+    border-color: #e7ddce transparent transparent;
+    position: relative;
+}
+#welcome-logo-fox .fox-nose:before {
+    display: block;
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0px 46px 100px 0;
+    border-color: transparent #ffac34 transparent transparent;
+    left: -46px;
+    top: -22px;
+    z-index: -1;
+}
+#welcome-logo-fox .fox-nose:after {
+    display: block;
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0px 0 100px 46px;
+    border-color: transparent transparent transparent #d6601f;
+    top: -22px;
+    z-index: -1;
+}
+
+#welcome-logo-fox .fox-body {
+    width: 120px;
+    height: 104px;
+    background: #ff8c35;
+    position: absolute;
+    z-index: -2;
+    left: 60px;
+    top: 116px;
+    -webkit-transform: rotate(-45deg);
+    transform: rotate(-45deg);
+    box-shadow: -15px 60px 0 -40px #d6601f;
+}
+#welcome-logo-fox .fox-body:before {
+    display: block;
+    content: "";
+    position: absolute;
+    border-width: 35px 30px 43px 0;
+    border-style: solid;
+    border-color: transparent #ff8c35 transparent transparent;
+    height: 116px;
+    width: 0;
+    left: -30px;
+    top: 0;
+}
+#welcome-logo-fox .fox-body:after {
+    display: block;
+    content: "";
+    position: absolute;
+    border-width: 0px 38px 116px 0px;
+    border-style: solid;
+    border-color: transparent transparent #ffac34 transparent;
+    height: 0px;
+    width: 0;
+    left: 0px;
+    top: 0px;
+}
+
+#welcome-logo-fox .fox-tail {
+    height: 0;
+    -webkit-transform: rotate(-8deg);
+    transform: rotate(-8deg);
+    border-style: solid;
+    border-color: #e7ddce transparent transparent transparent;
+    width: 62px;
+    top: 59px;
+    left: 71px;
+    border-width: 9px 10px 0 31px;
+    position: relative;
+}
+#welcome-logo-fox .fox-tail:after {
+    display: block;
+    content: "";
+    position: absolute;
+    top: -32px;
+    left: -30px;
+    border-width: 0 30px 23px 30px;
+    border-style: solid;
+    border-color: #fff5e5 transparent;
+}
+
+
+@-webkit-keyframes rainbow {
+    0%{background-position:0% 60%}
+    50%{background-position:100% 20%}
+    100%{background-position:0% 80%}
+}
+@-moz-keyframes rainbow {
+    0%{background-position:0% 60%}
+    50%{background-position:100% 20%}
+    100%{background-position:0% 80%}
+}
+@-o-keyframes rainbow {
+    0%{background-position:0% 60%}
+    50%{background-position:100% 20%}
+    100%{background-position:0% 80%}
+}
+@keyframes rainbow {
+    0%{background-position:0% 60%}
+    50%{background-position:100% 20%}
+    100%{background-position:0% 80%}
+}
