@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><%TITLE%> Devtools Loader</title>
+    <script>
+        try {
+            chrome.devtools.panels.create('<%TITLE%>', 'image/onion-box/icon-close.png', 'page/dashboard/main.html', null);
+        } catch (e) {
+            throw Error('devtools loader error.');
+        }
+    </script>
+</head>
+<body>
+</body>
+</html>
