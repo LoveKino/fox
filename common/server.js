@@ -15,7 +15,7 @@ function start (options) {
         port = options.port || '8000',
         dir  = options.dir || 'data';
 
-    var dataBasePath = './server/' + dir + '/';
+    var dataBasePath = './' + dir + '/';
     process.chdir(dataBasePath);
 
     http.createServer(function (request, response) {
