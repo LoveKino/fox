@@ -8,6 +8,38 @@
 
 可信赖, 易用的界面测试工具。
 
+## 源码
+
+<table>
+<thead>
+  <tr>
+    <td align="center" colspan="3">查看源码</td>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td align="center">
+      <a target="_blank" href="https://github.com/soulteary/fox/tree/chrome-extension">
+        <img width="60" height="60" src="./welcome-assets/icon-browser.png" title="浏览器插件">
+        <div>浏览器插件</div>
+      </a>
+    </td>
+    <td align="center">
+      <a target="_blank" href="https://github.com/soulteary/fox/tree/desktop-application">
+        <img width="60" height="60" src="./welcome-assets/icon-desktop.png" title="桌面客户端">
+        <div>桌面客户端</div>
+      </a>
+    </td>
+    <td align="center">
+      <a target="_blank" href="https://github.com/soulteary/fox/tree/cloud-server">
+        <img width="60" height="60" src="./welcome-assets/icon-cloud.png" title="服务端程序">
+        <div>服务端程序</div>
+      </a>
+    </td>
+  </tr>
+</tbody>
+</table>
+
 
 ## 截图预览
 
