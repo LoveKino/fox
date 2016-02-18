@@ -12,7 +12,6 @@ var flag = common.getFlag();
 
 
 gulp.task('lint', function () {
-    // return gulp;
     if (flag.isProduction || flag.enableLint) {
         var eslint = require('gulp-eslint');
         var lintFiles = [
