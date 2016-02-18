@@ -1,0 +1,56 @@
+{
+    "name": "Fox",
+    "subTitle": "User Interface Testing/ Replay/ Monitor/ Analytics.",
+    "version": "0.2.1",
+    "description": "Fox is a chrome extension which help you do something better: User Interface Testing/ Replay/ Monitor/ Analytics.",
+    "main": "Gulpfile.js",
+    "scripts": {
+        "mock-server": "node ./server/index.js"
+    },
+    "private": true,
+    "author": "soulteary",
+    "license": "MIT",
+    "homepage": "https://github.com/soulteary/fox",
+    "eslintConfig": {
+        "globals": {
+            "chrome": true,
+            "jQuery": true,
+            "$": true
+        },
+        "rules": {
+            "indent": [
+                2,
+                4,
+                {
+                    "SwitchCase": 1
+                }
+            ],
+            "quotes": [
+                2,
+                "single"
+            ],
+            "linebreak-style": [
+                2,
+                "unix"
+            ],
+            "semi": [
+                2,
+                "always"
+            ],
+            "no-trailing-spaces": 2,
+            "space-before-function-paren": [
+                2,
+                "always"
+            ],
+            "eqeqeq": [
+                2,
+                "allow-null"
+            ]
+        },
+        "env": {
+            "browser": true,
+            "node": true
+        },
+        "extends": "eslint:recommended"
+    }
+}
