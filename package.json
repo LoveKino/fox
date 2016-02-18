@@ -5,8 +5,7 @@
     "description": "Fox is a chrome extension which help you do something better: User Interface Testing/ Replay/ Monitor/ Analytics.",
     "main": "Gulpfile.js",
     "scripts": {
-        "start": "./node_modules/.bin/gulp",
-        "mock-server": "node ./server/index.js"
+        "start": "./node_modules/.bin/gulp"
     },
     "private": true,
     "author": "soulteary",
