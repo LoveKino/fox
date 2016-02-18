@@ -40,12 +40,6 @@
 
 ## 开发构建
 
-- [构建服务端程序](#)
-
-```bash
-$ git clone -b chrome-extension --single-branch git@github.com:soulteary/fox.git chrome-extension
-```
-
 - [构建桌面客户端](#)
 
 ```bash
@@ -57,5 +51,11 @@ $ git clone -b desktop-application --single-branch git@github.com:soulteary/fox.
 
 ```bash
 $ git clone -b chrome-extension --single-branch git@github.com:soulteary/fox.git chrome-extension
+```
+
+- [构建服务端程序](#)
+
+```bash
+$ git clone -b cloud-server --single-branch git@github.com:soulteary/fox.git cloud-server
 ```
 
