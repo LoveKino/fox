@@ -33,7 +33,7 @@ function register (data) {
         }
     } else {
         try {
-            fs.mkdirSync(path.baseUsrDir) &&
+            fs.mkdirSync(path.baseUsrDir);
             util.writeJson(path.usrProfile, '');
             console.log('user register success', data);
             return true;
@@ -50,7 +50,6 @@ function register (data) {
  * @returns {*}
  */
 function authenticate (data) {
-
     var path = util.getUsrPath(data);
     if (!path) {
         return false;
@@ -62,8 +61,7 @@ function authenticate (data) {
     return result;
 }
 
-module.exports = function (method, data) {
-
+export default (method, data) => {
     var action = method.replace(/\.json$/, '');
 
     var signal = null;
@@ -74,6 +72,9 @@ module.exports = function (method, data) {
         case 'login':
         case 'authenticate':
             signal = authenticate(data);
+            break;
+        default :
+            signal = false;
             break;
     }
 

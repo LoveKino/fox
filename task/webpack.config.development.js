@@ -25,11 +25,19 @@ config.entry = [
 
 config.output.publicPath = 'http://localhost:3000/dist/';
 
+/**
+ * 如需排除less资源，手动同步资源，可以使用：
+ *
+ {
+     test   : /\.less$/,
+     loader : 'style!css!less',
+     exclude : /image/
+ },
+ */
 config.module.loaders.push(
     {
         test   : /\.less$/,
-        loader : 'style!css!less' //,
-        //exclude : /image/
+        loader : 'style!css!less'
     },
 
     {
@@ -50,7 +58,7 @@ config.module.loaders.push(
 
     {
         test   : /\.(jpg|jpeg|png|gif|woff)$/i,
-        loader : "file-loader?name=" + "images/[name].[ext]"
+        loader : 'file-loader?name=' + 'images/[name].[ext]'
     }
 );
 

@@ -6,19 +6,20 @@ const flow = require('noflow');
 const nokit = require('nokit');
 const proxy = nokit.require('proxy');
 
-let flowApp = flow();
-
 const userApi = require('../api/user');
 const caseApi = require('../api/case');
 
 proxy.body = require('./nokit.proxy.patch');
 
 export default function (actionType) {
+    const flowApp = flow();
+
     switch (actionType) {
         case 'start':
             flowApp.push(
                 proxy.body({maxLength : 1e6, parseJson : true}),    // 1MB
-                proxy.select({
+                proxy.select(
+                    {
                         url     : proxy.match('/user/:action'),
                         method  : 'POST',
                         headers : {
@@ -26,7 +27,8 @@ export default function (actionType) {
                         }
                     }, $ => $.body = userApi($.url.action.replace(/\.json/, ''), $.req)
                 ),
-                proxy.select({
+                proxy.select(
+                    {
                         url     : proxy.match('/case/:action'),
                         method  : 'POST',
                         headers : {

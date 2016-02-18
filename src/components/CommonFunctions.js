@@ -28,8 +28,8 @@ export default class CommonFunctions extends Component {
                             <section className="welcome-panel">
                                 <h1 className="welcome-title">了解测试工具 Fox!</h1>
                                 <details className="welcome-card" data-section="project">
-                                    <summary className="welcome-summary icon icon-repo">创建新的<span
-                                        className="welcome-highlight"><Link to="/record">测试用例</Link></span>
+                                    <summary className="welcome-summary icon icon-repo">创建新的
+                                        <span className="welcome-highlight"><Link to="/record">测试用例</Link></span>
                                     </summary>
                                     <div className="welcome-detail">
                                         <p><img className="welcome-img" src="atom://welcome/assets/project.svg"/></p>
@@ -43,11 +43,12 @@ export default class CommonFunctions extends Component {
                                         <p className="welcome-note"><strong>提示:</strong>你也可以使用菜单栏的创建按钮。</p></div>
                                 </details>
                                 <details className="welcome-card" data-section="packages">
-                                    <summary className="welcome-summary icon icon-package">浏览已有<span
-                                        className="welcome-highlight">测试用例</span></summary>
+                                    <summary className="welcome-summary icon icon-package">浏览已有
+                                        <span className="welcome-highlight">测试用例</span></summary>
                                     <div className="welcome-detail">
-                                        <p><img className="w elcome-img"
-                                                data-src="atom://welcome/assets/package.svg"/></p>
+                                        <p>
+                                            <img className="welcome-img" data-src="atom://welcome/assets/package.svg"/>
+                                        </p>
 
                                         <p>查看和管理之前已经存在的测试用例。</p>
 
@@ -57,11 +58,12 @@ export default class CommonFunctions extends Component {
                                         <p className="welcome-note"><strong>提示:</strong>你也可以使用菜单栏的创建按钮。</p></div>
                                 </details>
                                 <details className="welcome-card" data-section="themes">
-                                    <summary className="welcome-summary icon icon-paintcan">围观15秒<span
-                                        className="welcome-highlight">教学视频</span></summary>
+                                    <summary className="welcome-summary icon icon-paintcan">围观15秒
+                                        <span className="welcome-highlight">教学视频</span></summary>
                                     <div className="welcome-detail">
-                                        <p><img className="welcome-img"
-                                                data-src="atom://welcome/assets/theme.svg"/></p>
+                                        <p>
+                                            <img className="welcome-img" data-src="atom://welcome/assets/theme.svg"/>
+                                        </p>
 
                                         <p>我们将视频时间缩短到了十五秒，希望你能喜欢。</p>
 
@@ -75,12 +77,13 @@ export default class CommonFunctions extends Component {
 
                                 </details>
                                 <details className="welcome-card" data-section="styling">
-                                    <summary className="welcome-summary icon icon-paintcan">前往<span
-                                        className="welcome-highlight">工具社区</span>看看
+                                    <summary className="welcome-summary icon icon-paintcan">前往
+                                        <span className="welcome-highlight">工具社区</span>看看
                                     </summary>
                                     <div className="welcome-detail">
-                                        <p><img className="welcome-img"
-                                                data-src="atom://welcome/assets/code.svg"/></p>
+                                        <p>
+                                            <img className="welcome-img" data-src="atom://welcome/assets/code.svg"/>
+                                        </p>
 
                                         <p>一款好用的软件离不开社区的支持，如果你遇到了什么问题，欢迎在社区里提出。</p>
 

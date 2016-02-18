@@ -65,4 +65,4 @@ export default {
         }).replace(/%DATA%/g, JSON.stringify(data));
         return template;
     }
-}
+};

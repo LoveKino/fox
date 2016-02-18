@@ -1,5 +1,3 @@
-'use strict';
-
 const exec = require('child_process').exec;
 const fs = require('fs');
 const path = require('path');
@@ -16,28 +14,25 @@ const ignoreDirs = [
 ];
 
 var watcher = chokidar.watch(baseDir, {
-    ignored    : [/[\/\\]\./,
-        '*.*___jb_old___',
-        '*.*___jb_bak___'
-    ],
+    ignored    : [/[\/\\]\./, '*.*___jb_old___', '*.*___jb_bak___'],
     persistent : true
 });
 
 function syncFile (src, dest) {
-    function sync (src, dest) {
-        exec(`cp -f ${src} ${dest}`);
-        log(`sync ${src} ${dest}`);
+    function sync (from, to) {
+        exec(`cp -f ${from} ${to}`);
+        log(`sync ${from} ${to}`);
     }
 
-    fs.stat(src, (err, stats)=> {
+    fs.stat(src, (err, stats) => {
         if (err) {
             console.log('sync error, retry', src);
-            (function(src, dest){
-                setTimeout(function(){
-                    sync(src, dest);
-                },300);
+            (function deferSync (from, to) {
+                setTimeout(function defer () {
+                    sync(from, to);
+                }, 300);
             })(src, dest);
-        }else{
+        } else {
             if (stats.isFile() && fs.statSync(src)) {
                 sync(src, dest);
             } else {
@@ -45,11 +40,10 @@ function syncFile (src, dest) {
             }
         }
     });
-
 }
 
 function inDirsList (src, opt) {
-    return opt.some(path => src.indexOf(path) === 0);
+    return opt.some(dir => src.indexOf(dir) === 0);
 }
 
 
@@ -61,7 +55,7 @@ watcher
     })
     .on('change', (filePath, stats) => {
         if (stats) {
-            log(`File ${filePath} changed size to ${stats.size}`)
+            log(`File ${filePath} changed size to ${stats.size}`);
         } else {
             log(`File ${filePath} changed`);
         }
@@ -80,7 +74,7 @@ watcher
         ) {
             exec(`./node_modules/.bin/babel ${filePath} --out-file ${filePath.replace(baseDir, distDir)}`, (err, stdout) => {
                 if (err) {
-                    log(`build error: ${err} ; file path: ${filePath}`);
+                    log(`build error: ${err} ; file path: ${filePath} ; stdout: ${stdout}`);
                 } else {
                     log(`[babel compile done] ${filePath.replace(baseDir, distDir)}`);
                 }
@@ -90,5 +84,4 @@ watcher
                 syncFile(filePath, filePath.replace(baseDir, distDir));
             }
         }
-
     });

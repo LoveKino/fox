@@ -48,7 +48,7 @@ config.module.loaders.push(
 
     {
         test   : /\.(jpg|jpeg|png|gif|woff)$/i,
-        loader : "file-loader?name=" + "images/[name].[ext]"
+        loader : 'file-loader?name=' + 'images/[name].[ext]'
     }
 );
 

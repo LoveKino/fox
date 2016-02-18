@@ -5,7 +5,7 @@ import HomePageGuide from './HomePageGuide';
 import CommonFunctions from './CommonFunctions';
 
 var LoadingPic = React.createClass({
-    render : function () {
+    render : function render () {
         function createMarkup (width, height) {
             return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="${width}" height="${height}" fill="white">
             <circle transform="translate(8 0)" cx="0" cy="16" r="0">
@@ -18,7 +18,7 @@ var LoadingPic = React.createClass({
               <animate attributeName="r" values="0; 4; 0; 0" dur="1.2s" repeatCount="indefinite" begin="0.6" keytimes="0;0.2;0.7;1" keySplines="0.2 0.2 0.4 0.8;0.2 0.6 0.4 0.8;0.2 0.6 0.4 0.8" calcMode="spline" />
             </circle>
           </svg>`;
-        };
+        }
 
         return (
             <div dangerouslySetInnerHTML={{__html: createMarkup(this.props.width, this.props.height)}}/>
@@ -94,7 +94,7 @@ export default class Home extends Component {
                             </div>
                         </status-bar>
                     </fox-panel>
-                
+
                 </fox-panel-container>
 
             </fox-workspace-axis>

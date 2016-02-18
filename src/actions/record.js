@@ -14,9 +14,9 @@ export function stop () {
 }
 
 export function status () {
-    return (dispatch, getState)=> {
+    return (dispatch, getState) => {
         const { record } = getState();
         console.log(record, 'action record');
         return record;
-    }
+    };
 }

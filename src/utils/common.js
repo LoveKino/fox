@@ -12,8 +12,7 @@ function isExists (path) {
     try {
         var stat = fs.statSync(path);
         return stat.isDirectory() || stat.isFile();
-    }
-    catch (err) {
+    } catch (err) {
         return false;
     }
 }
@@ -25,7 +24,7 @@ function writeJson (path, data) {
 function readJson (path) {
     if (isExists(path)) {
         try {
-            return JSON.parse(fs.readFileSync(path))
+            return JSON.parse(fs.readFileSync(path));
         } catch (e) {
             return '';
         }

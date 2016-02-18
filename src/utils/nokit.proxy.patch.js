@@ -6,19 +6,16 @@
  * @returns {Function}
  */
 
-'use strict';
-
-
 export default function (opts = {}) {
     const maxLength = opts.maxLength || 0;
     const parseJson = opts.parseJson || false;
     let length = 0;
 
-    return function (ctx) {
-        return new Promise(function (resolve, reject) {
+    return function proxy (ctx) {
+        return new Promise(function promise (resolve, reject) {
             var buf;
             buf = new Buffer(0);
-            ctx.req.on('data', function (chunk) {
+            ctx.req.on('data', function data (chunk) {
                 if (maxLength) {
                     length += chunk.length;
                     if (length > maxLength) {
@@ -26,13 +23,12 @@ export default function (opts = {}) {
                         ctx.res.connection.destroy();
                         ctx.res.end();
                     }
-                    return buf = Buffer.concat([buf, chunk]);
-                } else {
-                    return buf = Buffer.concat([buf, chunk]);
                 }
+                buf = Buffer.concat([buf, chunk]);
+                return buf;
             });
             ctx.req.on('error', reject);
-            return ctx.req.on('end', function () {
+            return ctx.req.on('end', function end () {
                 if (buf.length > 0) {
                     ctx.reqBody = buf;
                     if (parseJson && ctx.req.headers['content-type']) {
@@ -41,9 +37,11 @@ export default function (opts = {}) {
                                 try {
                                     ctx.reqBody = JSON.parse(ctx.reqBody.toString());
                                 } catch (e) {
-                                    throw 'parse request data to object error.';
+                                    throw e;
                                 }
                                 break;
+                            default :
+                                throw new Error('not support content-type.');
                         }
                     }
                 }

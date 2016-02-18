@@ -1,8 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 
 var ChildTab = React.createClass({
-    render : function () {
-
+    render () {
         const active = this.props.active ? 'active': '';
         let className = 'tab sortable ' + active;
 
@@ -29,9 +28,9 @@ export default class Tabs extends Component {
     render () {
         return (
             <ul is="fox-tabs" class="list-inline tab-bar inset-panel" tabindex="-1">
-                {this.props.tabs.map(function (tab) {
+                {this.props.tabs.map(function generateListChildren (tab) {
                     const { title, type, active } = tab;
-                    return <ChildTab title={title} type={type} active={active}/>
+                    return <ChildTab title={title} type={type} active={active}/>;
                 })}
             </ul>
         );

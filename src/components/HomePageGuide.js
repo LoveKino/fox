@@ -1,12 +1,11 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router';
-import FoxLogo from './FoxLogo'
+import FoxLogo from './FoxLogo';
 
 
 export default class HomePageGuide extends Component {
 
     render () {
-
         let style = {
             'paneAxis' : {
                 'flexGrow' : 1
@@ -47,10 +46,11 @@ export default class HomePageGuide extends Component {
                                     <strong>咳咳:</strong> 如果你想获得更好的使用体验和产品质量，不妨参与社区，和我们一起将工作完善，你好我好大家好，大家好才是真的好。
                                 </p>
                             </section>
-                            <footer className="welcome-footer"><a href="https://atom.io/" data-event="footer-fox-io">MX TEAM</a> <span
-                                className="text-subtle">×</span> <a className="icon icon-octoface"
-                                                                    href="https://github.com/"
-                                                                    data-event="footer-octocat"></a></footer>
+                            <footer className="welcome-footer">
+                                <a href="https://atom.io/" data-event="footer-fox-io">MX TEAM</a>
+                                <span className="text-subtle">×</span>
+                                <a className="icon icon-octoface" href="https://github.com/" data-event="footer-octocat"></a>
+                            </footer>
                         </div>
                     </div>
                 </div>
@@ -58,4 +58,3 @@ export default class HomePageGuide extends Component {
         );
     }
 }
-
