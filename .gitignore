@@ -39,4 +39,5 @@ release
 .idea
 
 # server generate script
-/data/*
+/data/*/
+!/data/README.md
