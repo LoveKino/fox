@@ -14,7 +14,7 @@ var topicList = {
  * @param topic
  * @param query
  */
-function showTopic (topic, query) {
+function showTopic (topic, query, newTab) {
     var topicUrl = '';
     if (topicList.hasOwnProperty(topic)) {
 
@@ -27,10 +27,14 @@ function showTopic (topic, query) {
         topicUrl = topicList['404'];
     }
 
-    try {
-        chrome.tabs.create({url : chrome.extension.getURL(topicUrl)});
-    } catch (e) {
-        alert('插件发生错误，请重载插件。');
+    if (newTab) {
+        try {
+            chrome.tabs.create({url : chrome.extension.getURL(topicUrl)});
+        } catch (e) {
+            alert('插件发生错误，请重载插件。');
+        }
+    } else {
+        return topicUrl;
     }
 }
 

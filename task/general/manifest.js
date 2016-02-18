@@ -28,7 +28,7 @@ gulp.task('manifest', function () {
 
             content.name = projectConf.name + (flag.isProduction ? '': ' [开发模式]');
             content.description = projectConf.description;
-            content.browser_action.default_title = projectConf.name;
+            content.page_action.default_title = projectConf.name;
             content.homepage_url = projectConf.homepage;
             content.author = projectConf.author;
             content.version = projectConf.version;

@@ -4,135 +4,59 @@
     <meta charset="UTF-8">
     <title><%TITLE%></title>
 </head>
-<body style="width: 630px;height: 500px;">
+<body style="width: 230px;height: 350px;">
 
 <div class="container">
-    <div class="view-item view-log"></div>
-    <div class="view-item fn-hide view-code"></div>
-    <div class="view-item fn-hide view-user">
+    <div class="view-item view-controls is-initialized">
+        <div class="header-bar">FOX</div>
 
-        <div class="owl">
-            <div class="hand"></div>
-            <div class="hand hand-r"></div>
-            <div class="arms">
-                <div class="arm"></div>
-                <div class="arm arm-r"></div>
+        <h2 class="title-start">开始录制</h2>
+
+        <h2 class="title-stop">停止录制</h2>
+
+        <h2 class="title-finish">录制完成</h2>
+
+        <div id="heart" class="slow-beat"></div>
+
+        <div id="sync-data">
+            <div class="ball"></div>
+            <div class="ball"></div>
+            <div class="ball"></div>
+            <div class="ball"></div>
+            <div class="ball"></div>
+            <div class="ball"></div>
+            <div class="ball"></div>
+        </div>
+
+        <div class="box box-start">
+            <p>
+                <button class="btn btn-start">开始录制</button>
+            </p>
+            <p class="desc">点击按钮，开始录制。</p>
+        </div>
+
+        <div class="box box-stop">
+            <p>
+                <button class="btn btn-stop">停止录制</button>
+            </p>
+            <p class="desc">点击按钮，停止录制。</p>
+        </div>
+
+        <div class="box box-finish">
+            <p>
+                <button class="btn btn-sync" disabled>正在传输数据</button>
+            </p>
+            <p class="desc">录制当前页面行为完毕，正在进行数据传输。如果想要开始新的录制，请先刷新或者打开新页面。</p>
+        </div>
+
+        <div class="footer">
+            <div class="version">
+                <span>v0.2.2</span>
+                <span class="reload-bar fn-hide"> - 出现问题？<a href="#" class="btn-reload">重启插件</a>。</span>
             </div>
         </div>
-        <div class="form">
-            <div class="control">
-                <label for="email" class="fa fa-envelope"></label>
-                <input id="email" placeholder="Email" type="email"/>
-            </div>
-            <div class="control">
-                <label for="password" class="fa fa-asterisk"></label>
-                <input id="password" placeholder="Password" type="password"/>
-            </div>
-            <div class="control">
-                <a href="#" class="btn btn-login">REG/LOGIN</a>
-                <a href="#" class="btn btn-logout fn-hide">LOGOUT</a>
-            </div>
-        </div>
-        <div class="user-state-label" data-text-login="ALREADY LOGIN." data-text-logout="PLEASE LOGIN/REGISTER.">
-            PLEASE LOGIN/REGISTER.
-        </div>
-
-    </div>
-    <div class="view-item fn-hide view-manage">
-
-        <table cellspacing="0" class="case-list">
-            <caption>录制行为用例列表</caption>
-            <thead>
-            <tr>
-                <th abbr="ID" class="col-id">#</th>
-                <th abbr="Date">Date</th>
-                <th abbr="Name">用例名称</th>
-                <th abbr="Desc">Desc</th>
-                <th abbr="Url" class="col-opt">链接</th>
-            </tr>
-            </thead>
-            <tbody>
-
-            </tbody>
-            <caption align="bottom" class="update-time" data-tpl="Last Modified:%lastModified%"></caption>
-        </table>
-
-
-    </div>
-    <div class="view-item fn-hide view-reload">
-        <div class="header-bar">
-            确认操作
-        </div>
-        <h2>重启插件</h2>
-
-        <p>
-            <button class="btn btn-restart-plugin">确认重启</button>
-        </p>
-        <p>请确认已经将之前收集的代码进行了妥善保存，重启插件将会丢失之前的行为记录。</p>
-    </div>
-    <div class="view-item fn-hide view-info">
-        <div class="header-bar">
-            关于插件
-        </div>
-        <h2>关于</h2>
-
-        <ul class="grid-container">
-            <li class="grid-item">
-                <div class="card">
-                    <div class="snow"></div>
-                </div>
-                <div class="status">
-                    <p>正在完善中...</p>
-                </div>
-            </li>
-        </ul>
-
-
     </div>
 </div>
-
-<div class="notice-banner">
-    <h3 class="view-log view-actived">
-        <span class="notice-title">交互记录</span>
-        <span class="notice-content">新鲜出炉的交互记录</span>
-    </h3>
-
-    <h3 class="view-code">
-        <span class="notice-title">行为脚本</span>
-        <span class="notice-content">根据你的行为自动生成的代码</span>
-    </h3>
-
-    <h3 class="view-user">
-        <span class="notice-title">用户面板</span>
-        <span class="notice-content">绑定用户，让用例更加安全和私密</span>
-    </h3>
-
-    <h3 class="view-manage">
-        <span class="notice-title">用例管理</span>
-        <span class="notice-content">之前使用过的用例记录</span>
-    </h3>
-
-    <h3 class="view-reload">
-        <span class="notice-title">重启插件</span>
-        <span class="notice-content">有任何问题，可以尝试重启下插件</span>
-    </h3>
-
-    <h3 class="view-info">
-        <span class="notice-title">关于</span>
-        <span class="notice-content">稍后想想怎么做</span>
-    </h3>
-</div>
-
-
-<div class="btn-groups">
-    <button class="btn btn-active" data-tab="log" title="行为记录">记录</button>
-    <button class="btn" data-tab="code" title="获取代码">代码</button>
-    <button class="btn" data-tab="user" title="用户登录">用户</button>
-    <button class="btn" data-tab="manage" title="用例管理">管理</button>
-    <button class="btn" data-tab="reload" title="重启插件">重启</button>
-    <button class="btn" data-tab="info" title="关于">关于</button>
-</div>
-
 
 <script src="../../script/vendor.js"></script>
 <script src="../../script/popup.js"></script>
