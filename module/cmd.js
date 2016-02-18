@@ -20,7 +20,7 @@ module.exports = {
                 var snapshots = [];
                 for (var i = 0, j = fileList.length; i < j; i++) {
                     if (fileList[i].substr(fileList[i].lastIndexOf('.png')) === '.png') {
-                        snapshots.push(fileList[i])
+                        snapshots.push(fileList[i]);
                     }
                 }
                 console.log('获取截取图片列表', snapshots);

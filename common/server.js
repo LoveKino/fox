@@ -1,7 +1,5 @@
 var http        = require('http'),
-    querystring = require('querystring'),
-    url         = require('url'),
-    fs          = require('fs');
+    url         = require('url');
 
 var user = require('../module/user');
 var cases = require('../module/case');

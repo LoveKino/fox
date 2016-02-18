@@ -50,7 +50,7 @@ function save (data) {
                 'argv' : path.resolve(filePath),
                 'dir'  : path.resolve(currentSubDir),
                 'cwd'  : path.resolve(currentSubDir)
-            })
+            });
         }
 
         console.log('save user file', result);
@@ -74,5 +74,7 @@ module.exports = function (method, data) {
             break;
     }
 
-    return {'status' : (!!signal ? 'success': 'fail'), data : signal};
+    var status = !!signal;
+
+    return {'status' : (status ? 'success': 'fail'), 'data' : signal};
 };

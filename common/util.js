@@ -24,7 +24,7 @@ function writeJson (path, data) {
 function readJson (path) {
     if (isExists(path)) {
         try {
-            return JSON.parse(fs.readFileSync(path))
+            return JSON.parse(fs.readFileSync(path));
         } catch (e) {
             return '';
         }

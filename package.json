@@ -1,22 +1,17 @@
 {
-    "name": "Fox",
-    "subTitle": "User Interface Testing/ Replay/ Monitor/ Analytics.",
+    "name": "Fox-Cloud-Server",
     "version": "0.2.1",
-    "description": "Fox is a chrome extension which help you do something better: User Interface Testing/ Replay/ Monitor/ Analytics.",
-    "main": "Gulpfile.js",
+    "description": "Fox cloud server.",
+    "main": "index.js",
     "scripts": {
-        "start": "node ./index.js"
+        "start": "node ./index.js",
+        "eslint": "./node_modules/.bin/eslint common module index.js"
     },
     "private": true,
     "author": "soulteary",
     "license": "MIT",
-    "homepage": "https://github.com/soulteary/fox",
+    "homepage": "https://github.com/soulteary/fox/tree/cloud-server",
     "eslintConfig": {
-        "globals": {
-            "chrome": true,
-            "jQuery": true,
-            "$": true
-        },
         "rules": {
             "indent": [
                 2,
@@ -45,12 +40,15 @@
             "eqeqeq": [
                 2,
                 "allow-null"
-            ]
+            ],
+            "no-console": 0
         },
         "env": {
-            "browser": true,
             "node": true
         },
         "extends": "eslint:recommended"
+    },
+    "devDependencies": {
+        "eslint": "^2.1.0"
     }
 }

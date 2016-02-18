@@ -76,5 +76,7 @@ module.exports = function (method, data) {
             break;
     }
 
-    return {'status' : (!!signal ? 'success': 'fail')};
+    var status = !!signal;
+
+    return {'status' : (status ? 'success': 'fail')};
 };
