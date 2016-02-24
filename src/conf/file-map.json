@@ -1,5 +1,6 @@
 {
     "config": "script/conf/config.js",
+    "data": "script/util/data.js",
     "escape-html": "script/util/escape-html.js",
     "format": "script/util/format.js",
     "helper": "script/util/helper.js",
