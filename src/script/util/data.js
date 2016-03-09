@@ -11,229 +11,84 @@
  *      获取持久化数据    Date.get('KeyName'[, 'STORAGE AREA'])
  *      删除持久化数据    Date.del('KeyName'[, 'STORAGE AREA'])
  */
-
-var Config = require('config');
-var Util = require('helper');
-var LS = require('./localstorage');
 var Debug = require('debug.js');
 
-/**
- * 默认储存的键名
- * @type {string}
- */
-var defaultKey = 'cache';
+var localForage = require('localforage');
 
-/**
- * 用于储存通用数据的对象
- * @type {{}}
- */
-var cache = LS.get(defaultKey, {});
+var cache = {};
 
-/**
- * 配置数据的对象
- * @type {{}}
- */
-var config = {};
-Debug.info('[data.js]', '加载默认KEY的数据到内存:', cache);
+var DataBus = function (name, desc) {
+    return new DataBus.fn.init(name, desc);
+};
 
-/**
- * 接口对象
- * @constructor
- */
-function Data () {
-    this.version = '0.0.1';
-}
+DataBus.fn = DataBus.prototype = {
+    version     : '0.0.1',
+    constructor : DataBus
+};
 
-/**
- * 基础数据操作（GET/SET/DEL）
- * 当前数据在内存中的cache
- *
- * @param params
- * @returns {boolean|object}
- */
-function data (params) {
+DataBus.extend = DataBus.fn.extend = function () {
+    var options;
+    var name;
+    var copy;
+    var target = this;
 
-    // 不传递任何参数时
-    if (!params) {
-        return false;
-    }
-
-    // 带行为参数时
-    if (params.action) {
-        // 带key参数时
-        if (params.key) {
-            switch (params.action) {
-                case 'get':
-                    return storage(params.type)[params.key];
-                case 'set':
-                    if (params.value) {
-                        storage(params.type)[params.key] = params.value;
-                        return storage(params.type)[params.key] === params.value;
-                    } else {
-                        return false;
-                    }
-                    break;
-                case 'del':
-                    if (params.key) {
-                        delete storage(params.type)[params.key];
-                        return true;
-                    } else {
-                        return false;
-                    }
-                    break;
-                default :
-                    return false;
-            }
-        } else {
-            // 仅有行为参数时
-            switch (params.action) {
-                case 'get':
-                    return storage(params.type);
-                case 'set':
-                    if (!params.value) {
-                        switch (params.type) {
-                            case 'config':
-                                config = {};
-                                break;
-                            case 'cache':
-                            /* falls through */
-                            default :
-                                cache = {};
-                        }
-                    }
+    if ((options = arguments[0]) !== null) {
+        for (name in options) {
+            if (options.hasOwnProperty(name)) {
+                copy = options[name];
+                if (target === copy) continue;
+                if (copy !== undefined) target[name] = copy;
             }
         }
-    } else {
-        // 如果不传递任何参数，输出
-        return {
-            cache  : cache,
-            config : config
-        };
     }
-}
-
-/**
- * 选择数据储存的对象
- * @param type
- * @returns {{}}
- */
-function storage (type) {
-    switch (type) {
-        case 'config':
-            return config;
-        case 'cache':
-        /* falls through */
-        default :
-            return cache;
-    }
-}
-
-/**
- * 获取内存中的对象数据
- * @param {string} key 存储数据key
- * @param {string} stor (config|cache)存储的数据类型，默认为cache
- * @returns {mixed} data key对应的数据
- */
-Data.prototype.get = function (key, stor) {
-    if (!stor) {
-        stor = defaultKey;
-    }
-    if (key) {
-        return data({action : 'get', type : stor, key : key});
-    } else {
-        return data({action : 'get', type : stor});
-    }
+    return target;
 };
 
-/**
- * 设置内存中的数据
- * @param {string} key 存储数据key
- * @param {mixed}  val 存储的数据
- * @param {string} stor (config|cache)存储的数据类型，默认为cache
- * @returns {mixed}
- */
-Data.prototype.set = function (key, val, stor) {
-    var argv = arguments;
-    if (argv.length > 1) {
-        key = argv[0];
-        val = argv[1];
-        if (!stor) {
-            stor = defaultKey;
+var init = DataBus.fn.init = function (name, description) {
+    cache[name] = {
+        'config'   : {
+            driver      : localForage.INDEXEDDB,
+            name        : name,
+            storeName   : 'default',
+            description : description || ''
         }
-        return data({action : 'set', type : stor, key : key, value : val});
-    } else {
-        return false;
-    }
+    };
+
+    var setItem = DataBus.fn.set = DataBus.fn.setItem = function () {
+        var storeName = arguments[0];
+        var argv = Array.prototype.slice.call(arguments, 1);
+        var inst = localForage.createInstance(cache[storeName].config);
+        return inst.setItem.apply(cache[storeName].instance, argv);
+    }.bind(undefined, name);
+    setItem.prototype = DataBus.fn;
+
+    var getItem = DataBus.fn.get = DataBus.fn.getItem = function () {
+        var storeName = arguments[0];
+        var argv = Array.prototype.slice.call(arguments, 1);
+        var inst = localForage.createInstance(cache[storeName].config);
+        Debug.info(inst.getItem.apply(cache[storeName].instance, argv),111122);
+        return inst.getItem.apply(cache[storeName].instance, argv);
+    }.bind(this, name);
+    getItem.prototype = DataBus.fn;
+
+    var removeItem = DataBus.fn.del = DataBus.fn.removeItem = function () {
+        var storeName = arguments[0];
+        var argv = Array.prototype.slice.call(arguments, 1);
+        cache[storeName].instance = cache[storeName].instance || localForage.createInstance(cache[storeName].config);
+        return cache[storeName].instance.removeItem.apply(cache[storeName].instance, argv);
+    }.bind(undefined, name);
+    removeItem.prototype = DataBus.fn;
+
+    var clear = DataBus.fn.clear = function () {
+        var storeName = arguments[0];
+        var argv = Array.prototype.slice.call(arguments, 1);
+        cache[storeName].instance = cache[storeName].instance || localForage.createInstance(cache[storeName].config);
+        return cache[storeName].instance.clear.apply(cache[storeName].instance, argv);
+    }.bind(undefined, name);
+    clear.prototype = DataBus.fn;
+
+    return this;
 };
+init.prototype = DataBus.fn;
 
-/**
- * 清除内存中的数据
- * @param {string} key 存储数据key
- * @param {string} stor (config|cache)存储的数据类型，默认为cache
- * @returns {*}
- */
-Data.prototype.del = function () {
-    if (arguments.length > 0) {
-        var key = arguments[0];
-        var stor = defaultKey;
-
-        if (arguments.length === 2) {
-            stor = arguments[1];
-        }
-        return data({action : 'del', type : stor, key : key});
-    } else {
-        return false;
-    }
-};
-
-/**
- * 操作配置对象
- * @param {string} key 存储数据key，如果不传，默认get所有配置
- * @param {mixed}  val 存储配置，如果不传入默认为get key的配置
- * @returns {*}
- */
-Data.prototype.config = function (key, val) {
-    var cfgKey = 'config';
-    switch (arguments.length) {
-        case 2:
-            return this.set(key, val, cfgKey);
-        case 1:
-            return this.get(key, cfgKey);
-        case 0:
-            return Config;
-        default :
-            return false;
-    }
-};
-
-/**
- * 对外暴露对象的save方法
- * 储存后会自动重载内存中的数据
- */
-Data.prototype.save = function (storageArea, overwrite) {
-    var stor = storageArea || defaultKey;
-    if (overwrite) {
-        Debug.info('覆盖之前储存的数据。');
-        LS.set(stor, cache);
-    } else {
-        var target = LS.get(stor) || {};
-        LS.set(stor, Util.extend(true, target, cache));
-    }
-    this.load();
-};
-
-/**
- * 对外暴露对象的load方法
- * @returns {*}
- */
-Data.prototype.load = function (storageArea) {
-    var stor = storageArea || defaultKey;
-
-    cache = LS.get(stor, {});
-    Debug.info('重新加载缓存的数据:', cache);
-    return LS.get(stor, {});
-};
-
-Data.prototype.storage = LS;
-
-module.exports = new Data();
+module.exports = DataBus;

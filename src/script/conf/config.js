@@ -102,6 +102,11 @@ var CSS_FN_CLASS = {
     'hide' : 'fn-hide'
 };
 
+var PAGE_LIST = {
+    'popup'      : '/page/popup/main.html',
+    'background' : '/page/background/main.html'
+};
+
 /**
  * get api data by name
  *
@@ -133,6 +138,7 @@ module.exports = {
         ACTION_MAP_USER     : ACTION_MAP_USER,
         ACTION_MAP_CONTROL  : ACTION_MAP_CONTROL
     },
+    'PAGE_LIST'   : PAGE_LIST,
     'CSS_LIST'    : CSS_FN_CLASS,
     'DOMAIN_LIST' : DOMAIN_LIST,
     'getApiInfo'  : getApiInfo

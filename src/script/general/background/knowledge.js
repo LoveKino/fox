@@ -13,8 +13,9 @@ var topicList = {
  * 打开主题页面
  * @param topic
  * @param query
+ * @param newWindow
  */
-function showTopic (topic, query) {
+function showTopic (topic, query, newWindow) {
     var topicUrl = '';
     if (topicList.hasOwnProperty(topic)) {
 
@@ -27,10 +28,14 @@ function showTopic (topic, query) {
         topicUrl = topicList['404'];
     }
 
-    try {
-        chrome.tabs.create({url : chrome.extension.getURL(topicUrl)});
-    } catch (e) {
-        alert('插件发生错误，请重载插件。');
+    if(newWindow){
+        try {
+            chrome.tabs.create({url : chrome.extension.getURL(topicUrl)});
+        } catch (e) {
+            alert('插件发生错误，请重载插件。');
+        }
+    }else{
+        return topicUrl;
     }
 }
 

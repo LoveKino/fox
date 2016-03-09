@@ -8,10 +8,6 @@ var debugModuleName = '[background/recorder]';
 
 var helper = require('helper');
 
-/** http network util **/
-var HttpNetwork = require('./http-network');
-
-
 /**
  * 当前程序运行模式
  * @type {string}
@@ -27,112 +23,68 @@ var injectFile = runMode === 'PRODUCTION' ? '/script/inject.min.js': '/script/in
 
 
 /**
- * 注入脚本的Option
- * @type {{currentWindow: boolean, active: boolean}}
- */
-var injectOption = {currentWindow : true, active : true};
-
-
-/**
  * 全局保存的用户行为
- * @type {Array}
+ * @type {{}}
+ * @desc {tabId:[actionList]}
  */
-var actionRecords = [];
-
-
-var curActiveTab = null;
-
-/**
- * 页面注入脚本
- * @param tabs
- * @param injectFile
- */
-function injectScript (tabs, injectFile) {
-    var targetTab = tabs[0];
-    if (helper.isStandardLink(targetTab.url, ['http', 'https'])) {
-        // record current tab viewport size
-        record(actionWrapper('BROWSER::CMD', 'set-viewport', {
-            'width'  : targetTab.width,
-            'height' : targetTab.height,
-            'url'    : targetTab.url
-        }));
-        chrome.tabs.executeScript(targetTab.id, {file : injectFile});
-    } else {
-        Debug.error(debugModuleName, '插件不支持i运行在非标准页面下。');
-    }
-}
-
-
-function processRequestHeaders (details) {
-    var headers = details.requestHeaders;
-    if (details.tabId === curActiveTab.id) {
-        Debug.info(details, curActiveTab);
-
-        for (var i = 0, j = headers.length; i < j; i++) {
-            if (headers[i].name.toLowerCase() === 'accept') {
-                var value = headers[i].value.toLowerCase();
-                if (value.indexOf('text/html') > -1 || value.indexOf('application/xml') > -1 || value.indexOf('application/xhtml') > -1) {
-                    // record current tab request headers
-                    record(actionWrapper('BROWSER::CMD', 'send-request-headers', {
-                        'headers' : details.requestHeaders,
-                        'url'     : curActiveTab.url
-                    }));
-                    // per request only contain one accept item
-                    break;
-                }
-            }
-        }
-    }
-    return {'requestHeaders' : headers};
-}
-
-function recordHeaders (tabs) {
-
-    var tab = null;
-    for (var item in tabs) {
-        if (tabs.hasOwnProperty(item) && tabs[item] && tabs[item].selected) {
-            tab = tabs[item];
-            break;
-        }
-    }
-
-    if (tab === null) {
-        return;
-    }
-
-    curActiveTab = tab;
-
-    HttpNetwork.request(processRequestHeaders);
-}
+var actionRecords = {};
 
 /**
  * 记录行为消息
- *
+ * @param tabId
  * @param action
+ * @returns {boolean}
  */
-function record (action) {
-
+function record (tabId, action) {
     Debug.log(debugModuleName, '接收页面记录到的行为:', action);
 
-    var lastAction = actionRecords[actionRecords.length - 1];
-    if (!lastAction) {
-        return actionRecords.push(action);
+    if (actionRecords.hasOwnProperty(tabId)) {
+        Debug.warn(debugModuleName, '有当前tabId属性:', actionRecords[tabId]);
     } else {
-        if (lastAction === action) {
-            return;
+        actionRecords[tabId] = [];
+        Debug.warn(debugModuleName, '创建tabId队列:', actionRecords[tabId]);
+    }
+
+    if (actionRecords[tabId].length) {
+        var last = actionRecords[tabId][actionRecords[tabId].length - 1];
+        if (last === action) {
+            return false;
         }
-        actionRecords.push(action);
+    }
+
+    actionRecords[tabId].push(action);
+}
+
+/**
+ * 获取当前录制的行为列表
+ * @param tabId
+ * @returns {*}
+ */
+function getData (tabId) {
+    if (actionRecords.hasOwnProperty(tabId)) {
+        return actionRecords[tabId];
+    } else {
+        return false;
     }
 }
 
-
-function injectPluginActionRecord (name, action, option) {
+/**
+ * 向事件队列手动插入行为
+ * @param tabId
+ * @param name
+ * @param action
+ * @param option
+ */
+function injectPluginActionRecord (tabId, name, action, option) {
+    if (!actionRecords.hasOwnProperty(tabId)) {
+        actionRecords[tabId] = [];
+    }
     Debug.log(debugModuleName, '主动插入记录:', action);
     var item = actionWrapper('PLUGIN::CMD', name, action);
     if (option === 'head') {
-        actionRecords.unshift(item);
+        actionRecords[tabId].unshift(item);
     } else {
-        actionRecords.push(item);
+        actionRecords[tabId].push(item);
     }
 }
 
@@ -151,7 +103,6 @@ function actionWrapper (eventGroup, eventType, data) {
     return result;
 }
 
-
 function detectScreenshots (command) {
     if (command === 'detect-screenshot') record(actionWrapper('SYSTEM::CMD', 'screenshot', {'fileName' : 'index.png'}));
 }
@@ -162,6 +113,7 @@ function detectUrl (details) {
     var from = details.transitionQualifiers;
     var action = '';
 
+    Debug.error(details);
     switch (type) {
         case 'reload':
             if (!actionRecords.length) {
@@ -186,47 +138,48 @@ function detectUrl (details) {
     return action;
 }
 
+/**
+ * 页面注入监听事件脚本
+ * @param tab
+ */
+function injectEventScript (tab) {
+    Debug.log(debugModuleName, '插入录制脚本到选项卡：', tab);
 
-function injectEventScript () {
-    chrome.tabs.query(injectOption, function (tabs) {
-        if (tabs && tabs.length) {
-            injectScript(tabs, injectFile);
-            Debug.log(debugModuleName, '插入录制脚本到选项卡：', tabs);
-            recordHeaders(tabs);
-        }
-    });
-}
-
-function detectEvents (tabId, changeInfo) {
-    if (changeInfo.status === 'complete') {
-        chrome.tabs.query(injectOption, function (tabs) {
-            if (tabs && tabs.length && tabId === tabs[0].id) {
-                injectScript(tabs, injectFile);
-                recordHeaders(tabs);
-            }
-        });
+    if (helper.isStandardLink(tab.url, ['http', 'https'])) {
+        // record current tab viewport size
+        record(tab.id, actionWrapper('BROWSER::CMD', 'set-viewport', {
+            'width'  : tab.width,
+            'height' : tab.height,
+            'url'    : tab.url
+        }));
+        chrome.tabs.executeScript(tab.id, {file : injectFile});
+    } else {
+        Debug.error(debugModuleName, '插件不支持运行在非标准页面下。');
     }
 }
 
-function reset () {
-    chrome.commands.onCommand.removeListener(detectScreenshots);
-    chrome.webNavigation.onCommitted.removeListener(detectUrl);
-    chrome.tabs.onUpdated.removeListener(detectEvents);
-    chrome.runtime.onMessage.removeListener(record);
 
-    HttpNetwork.resetHandle('request', processRequestHeaders);
+function startRecord (tab) {
+    chrome.commands.onCommand.addListener(detectScreenshots);
+    chrome.webNavigation.onCommitted.addListener(detectUrl);
+    // @notice:插入脚本后会触发消息通信，故置于onMessage前
+    injectEventScript(tab);
+    chrome.runtime.onMessage.addListener(record);
 }
 
+
+function resetRecord () {
+    chrome.commands.onCommand.removeListener(detectScreenshots);
+    chrome.webNavigation.onCommitted.removeListener(detectUrl);
+    chrome.runtime.onMessage.removeListener(record);
+}
+
+
 module.exports = {
-    start   : function () {
-        chrome.commands.onCommand.addListener(detectScreenshots);
-        chrome.webNavigation.onCommitted.addListener(detectUrl);
-        injectEventScript();
-        chrome.tabs.onUpdated.addListener(detectEvents);
-        chrome.runtime.onMessage.addListener(record);
-        recordHeaders();
-    },
-    reset   : reset,
+    start   : startRecord,
+    reset   : resetRecord,
+    //TODO:REMOVE
     records : actionRecords,
-    add     : injectPluginActionRecord
+    add     : injectPluginActionRecord,
+    getData : getData
 };

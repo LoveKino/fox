@@ -1,202 +1,231 @@
 /** the style of popup page. **/
 require('../../../style/page/popup/main.less');
 
-/** global config **/
-var Config = require('config');
+var Extension = require('../../common/extension');
+
 /** data util **/
-var DataBus = require('data');
-/** common message communication **/
-var Message = require('../../common/message');
-/** CodeMirror:javascript && markdown **/
-var CodeMirror = require('codemirror');
-require('codemirror/addon/edit/matchbrackets');
-require('codemirror/addon/edit/continuelist');
-require('codemirror/addon/comment/continuecomment');
-require('codemirror/addon/comment/comment');
-require('codemirror/mode/javascript/javascript');
-require('codemirror/mode/markdown/markdown');
-require('codemirror/mode/xml/xml');
-/** jsBeautify **/
-var Beautify = require('js-beautify');
-/** chrome toolbar plugin icon **/
-var BrowserIcon = require('../../common/browser-icon');
-/** convert user action record to code **/
-var Convert = require('../../general/popup/convert');
-/** network util **/
-var Network = require('network');
-
-/** codeMirror instance **/
-var cmCodeBox = null;
-var cmLogBox = null;
-/** keep cm instance which hidden refresh once **/
-var cmCodeBoxHasRefresh = false;
-/** timer handle for notice banner**/
-var handleNoticeBanner = null;
-
+var localForage = require('localforage');
+var DataBus = localForage.createInstance(
+    {
+        driver      : localForage.INDEXEDDB,
+        name        : 'popup',
+        storeName   : 'default',
+        description : 'popup暂存数据库。'
+    }
+);
 /** debug util **/
 var Debug = require('debug.js');
 /** current module name for debug util **/
 var debugModuleName = '[popup/main]';
-/** local user data method for popup **/
-var User = require('../../general/popup/user');
 
-/** user view **/
-var viewUser = require('../../general/popup/view-user');
-/** user manage **/
-var viewManage = require('../../general/popup/view-manage');
+var container = $('.view-controls');
+var heart = $('#heart');
 
+var port = chrome.runtime.connect({'name' : 'background'});
 
-function loadData (keyStore, callback) {
-    DataBus.load();
-    var response = DataBus.get(keyStore);
-    if (response) {
-        return callback(response);
-    } else {
-        return callback(null);
+port.postMessage({'popup' : 'init'});
+port.onMessage.addListener(function (msg) {
+    Debug.info(debugModuleName, msg);
+});
+
+/**
+ * 注册长连接给插件不同页面之间使用
+ */
+chrome.runtime.onConnect.addListener(function (port) {
+    Debug.info(debugModuleName, '插件通信端口连接成功:', port);
+    if (port.name === 'popup' || port.name === '*') {
+        port.onMessage.addListener(function (response) {
+            Debug.info(debugModuleName, '收到外部消息:', response);
+            if (Extension.checkUrlIsInternal(port.sender.url)) {
+                Debug.info(debugModuleName, '!!!', response);
+            } else {
+                Debug.info(debugModuleName, '@2@', response);
+            }
+        });
     }
+});
+
+
+/**
+ * Get current tab info
+ * @param success
+ * @param fail
+ */
+function currentTab (success, fail) {
+    chrome.tabs.query({currentWindow : true, active : true}, function (tabs) {
+        if (tabs && tabs.length) {
+            return success(tabs[0]);
+        } else {
+            return fail();
+        }
+    });
 }
 
-loadData('records', function (data) {
-    Debug.info(debugModuleName, '加载本次持久化数据:', data);
-    cmLogBox = CodeMirror($('.view-item.view-log').get(0), {
-        'theme'           : 'mdn-like',
-        'mode'            : 'markdown',
-        'lineNumbers'     : true,
-        'styleActiveLine' : true,
-        'matchBrackets'   : true,
-        'lineWrapping'    : true,
-        'readOnly'        : true,
-        'value'           : data
-    });
-    cmLogBox.setSize('100%', 500);
-});
+/**
+ * Send message to inject script
+ * @param tab
+ * @param data
+ * @param callback
+ */
+function sendMessage (tab, data, callback) {
+    chrome.tabs.sendMessage(tab.id, data, callback ? callback: function () {});
+}
 
-loadData('originRecords', function (data) {
-    if (data && data.length <= 1) {
-        $('.btn-groups .btn[data-tab=code]').addClass(Config.CSS_LIST.hide);
-        return;
-    }
-    var code = Convert.getCode(data);
+function toggleReload () {
+    $('.reload-bar').removeClass('fn-hide');
+}
 
-    var codeFormated = Beautify(code, {
-        'indent_size'              : 2,
-        'indent_char'              : ' ',
-        'max_preserve_newlines'    : 1,
-        'preserve_newlines'        : true,
-        'keep_array_indentation'   : true,
-        'break_chained_methods'    : true,
-        'indent_scripts'           : true,
-        'brace_style'              : true,
-        'space_before_conditional' : true,
-        'unescape_strings'         : true,
-        'jslint_happy'             : false,
-        'end_with_newline'         : true,
-        'wrap_line_length'         : true,
-        'indent_inner_html'        : true,
-        'comma_first'              : false,
-        'e4x'                      : true
-    });
+/**
+ * Toggle heart beat speed
+ */
+function toggleHeart () {
+    $('#heart').toggleClass('slow-beat fast-beat');
+}
 
+/**
+ * Adjust popup view state
+ */
+function adjustState (tab) {
+    DataBus.getItem('state#' + tab.id, function (state) {
+        Debug.info(debugModuleName, '调整状态, 当前状况:', state);
+        switch (state) {
+            case 'started':
+                heart.fadeIn();
+                toggleHeart();
+                container.addClass('is-started');
+                container.removeClass('is-stopped is-initialized');
+                break;
+            case 'stopped':
+                toggleHeart();
+                container.addClass('is-stopped');
+                container.removeClass('is-started is-initialized');
 
-    // save result to local
-    var caseList = DataBus.get('list', 'case-list');
-    if (caseList) {
-        caseList.push(codeFormated);
-    } else {
-        caseList = [codeFormated];
-    }
-    DataBus.set('list', caseList, 'case-list');
-    DataBus.save('case-list');
+                heart.fadeOut();
+                $('#sync-data').fadeIn();
 
-    cmCodeBox = CodeMirror($('.view-item.view-code').get(0), {
-        'theme'           : 'monokai',
-        'mode'            : 'javascript',
-        'lineNumbers'     : true,
-        'styleActiveLine' : true,
-        'matchBrackets'   : true,
-        'lineWrapping'    : true,
-        'value'           : codeFormated
-    });
-    cmCodeBox.setSize('100%', 500);
+                //
+                var sync = DataBus.getItem('sync-state#' + tab.id);
 
-    var userData = User.getUserData();
-    var user = userData.user;
-    var pass = userData.pass;
-
-    if (!(user && pass)) {
-        Debug.warn(debugModuleName, '用户尚未登录，使用单机模式。');
-        return;
-    }
-
-    // request api to save case
-    Network.request('saveCase', null, {
-        user : user,
-        pass : pass,
-        data : codeFormated
-    }, function (resp) {
-        if (resp && resp.status === 'success') {
-            Debug.info(debugModuleName, 'case to server success');
-        }
-    }, function (resp) {
-        Debug.info(debugModuleName, 'case to server fail', resp);
-    }, {contentType : 'application/json'});
-
-});
-
-viewUser.init();
-viewManage.init();
-
-$('.btn-groups').delegate('.btn', 'click', function (e) {
-    e.preventDefault();
-    var btn = $(e.target);
-    var tabName = btn.data('tab');
-    var tab = $('.view-' + tabName);
-    if (tab.length) {
-        tab.addClass('view-actived').removeClass(Config.CSS_LIST.hide).siblings().addClass(Config.CSS_LIST.hide).removeClass('view-actived');
-        btn.addClass('btn-active').siblings().removeClass('btn-active');
-
-        clearTimeout(handleNoticeBanner);
-        handleNoticeBanner = setTimeout(function () {
-            $('.notice-banner .view-actived').removeClass('view-actived');
-        }, 5000);
-
-        switch (tabName) {
-            case 'code':
-                if (!cmCodeBoxHasRefresh) {
-                    cmCodeBox.refresh();
-                    cmCodeBoxHasRefresh = true;
+                if (sync === 'success') {
+                    $('.btn-sync').text('传输数据完毕');
+                } else if (sync === 'fail') {
+                    $('.btn-sync').text('传输数据失败');
+                } else {
+                    $('.btn-sync').text('插件出错');
+                    toggleReload();
                 }
-                cmCodeBox.focus();
+
                 break;
-            case 'log':
-                cmLogBox.focus();
-                break;
-            case 'user':
+            default :
+                heart.fadeIn();
+
+                container.addClass('is-initialized');
+                container.removeClass('is-stopped is-started');
                 break;
         }
-    }
-});
+    });
+}
 
-setTimeout(function () {
-    $('.notice-banner .view-actived').removeClass('view-actived');
-}, 5000);
+function init (targetTab) {
 
+    $('.btn-reload').off('click').on('click', function () {
+        //todo 这里期望能在响应消息后重载
+        sendMessage(targetTab, {'APP:MSG' : 'RELOAD-PLUGIN'}, function (resp) {
+            Debug.info(debugModuleName, '用户点击插件栏重载插件按钮，发送消息:', resp);
+            switch (resp) {
+                case 'INJECT-PAGE-RELOAD':
+                    DataBus.clear();
 
-var btnRestartPlugin = $('.btn-restart-plugin');
-btnRestartPlugin.on('click', function (e) {
-    e.preventDefault();
-
-    //todo 这里期望能在响应消息后重载
-    Message.sendMessageFromBackground({'APP:MSG' : 'RELOAD-PLUGIN'}, function (resp) {
-        Debug.info(debugModuleName, '用户点击插件栏重载插件按钮，发送消息:', resp);
+                    //window.close() &&
+                    setTimeout(function () {
+                        chrome.runtime.reload();
+                    }, 500);
+                    break;
+                default :
+                    Debug.info(debugModuleName, '重启失败，页面尚未刷新。');
+                    break;
+            }
+        });
     });
 
-    BrowserIcon.reset();
-    DataBus.del('originRecords');
-    DataBus.del('records');
-    DataBus.save();
+    $('.btn-start').off('click').on('click', function (e) {
+        e.preventDefault();
+        Debug.warn(debugModuleName, '点击开始。');
+        port.postMessage({
+            'popup'  : 'start',
+            'tabId'  : targetTab.id,
+            'width'  : targetTab.width,
+            'height' : targetTab.height,
+            'url'    : targetTab.url
+        });
+        port.onMessage.addListener(function (response) {
+            if (response.state === 'started') {
+                Debug.log(debugModuleName, '收到BG开始录制消息。');
+                DataBus.setItem('state#' + targetTab.id, 'started');
+                sendMessage(targetTab, {'APP:MSG' : 'START-RECORD'}, function (response) {
+                    Debug.info(debugModuleName, '用户主动发送开始请求,响应内容:', response);
+                    //window.close() &&
+                    setTimeout(function () {adjustState(targetTab);}, 1000);
+                });
+            } else {
+                Debug.warn('BG未准备好录制事件。');
+            }
+        });
+    });
 
-    chrome.runtime.reload();
-    window.close();
+    var btnSync = $('.btn-sync');
 
-});
+    $('.btn-stop').off('click').on('click', function (e) {
+        e.preventDefault();
+        port.postMessage({'popup' : 'stop', 'tabId' : targetTab.id});
+        port.onMessage.addListener(function (response) {
+            Debug.info(debugModuleName, response);
+
+            Debug.warn(debugModuleName, '点击停止。', targetTab);
+            sendMessage(targetTab, {'APP:MSG' : 'STOP-RECORD'}, function (response) {
+                Debug.info(debugModuleName, '用户主动发送结束请求,响应内容:', response);
+            });
+            switch (response.state) {
+                case 'SYNC-READY':
+                    btnSync.text('传输数据完毕');
+                    break;
+                case 'SYNC-FAILED':
+                    btnSync.text('传输数据失败');
+                    break;
+            }
+            adjustState(targetTab);
+        });
+    });
+
+    adjustState(targetTab);
+}
+
+
+currentTab(
+    function (targetTab) {
+        /**
+         * send popup shown message to inject script
+         */
+        sendMessage(targetTab, {'APP:MSG' : 'POPUP-SHOWN'}, function (resp) {
+            Debug.info(debugModuleName, '弹出窗已被展示', resp);
+            if (!resp) {
+
+                port.postMessage({'popup' : 'shown', 'tabId' : targetTab.id});
+                port.onMessage.addListener(function (response) {
+                    Debug.info(debugModuleName, response);
+                    //DataBus.removeItem('state#' + targetTab.id);
+                    adjustState(targetTab);
+                });
+            }
+            init(targetTab);
+        });
+
+    },
+    function () {
+        Debug.error(debugModuleName, '获取当前tab信息出错。');
+        toggleReload();
+    }
+);
+
+
+

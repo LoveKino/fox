@@ -1,85 +1,86 @@
 {
-    "name": "Fox",
-    "subTitle": "User Interface Testing/ Replay/ Monitor/ Analytics.",
-    "version": "0.2.1",
-    "description": "Fox is a chrome extension which help you do something better: User Interface Testing/ Replay/ Monitor/ Analytics.",
-    "main": "Gulpfile.js",
-    "scripts": {
-        "start": "./node_modules/.bin/gulp",
-        "eslint": "NODE_ENV=production ./node_modules/.bin/gulp lint"
+  "name": "Fox",
+  "subTitle": "Fox client for Chrome.",
+  "version": "0.2.2",
+  "description": "Fox is a chrome extension which help you do something better: User Interface Testing/ Replay/ Monitor/ Analytics.",
+  "main": "Gulpfile.js",
+  "scripts": {
+    "start": "./node_modules/.bin/gulp",
+    "eslint": "NODE_ENV=production ./node_modules/.bin/gulp lint"
+  },
+  "private": true,
+  "author": "soulteary",
+  "license": "MIT",
+  "homepage": "https://github.com/soulteary/fox/tree/chrome-extension",
+  "devDependencies": {
+    "codemirror": "^5.9.0",
+    "css-loader": "^0.23.0",
+    "debug.js": "^1.1.4",
+    "extract-text-webpack-plugin": "^0.9.1",
+    "format": "^0.2.1",
+    "gulp": "^3.9.0",
+    "gulp-clean": "^0.3.1",
+    "gulp-concat": "^2.6.0",
+    "gulp-copy": "0.0.2",
+    "gulp-eslint": "^1.1.1",
+    "gulp-htmlmin": "^1.2.0",
+    "gulp-if": "^2.0.0",
+    "gulp-jsoncombine": "^1.0.3",
+    "gulp-replace": "^0.5.4",
+    "html-webpack-plugin": "^1.7.0",
+    "jquery": "^2.1.4",
+    "js-beautify": "^1.5.10",
+    "less": "^2.5.3",
+    "less-loader": "^2.2.1",
+    "localforage": "^1.4.0",
+    "moment": "^2.10.6",
+    "require-dir": "^0.3.0",
+    "string-replace-webpack-plugin": "0.0.2",
+    "style-loader": "^0.13.0",
+    "url-param-parser": "0.0.2",
+    "uuid-js": "^0.7.5",
+    "webpack": "^1.12.9"
+  },
+  "eslintConfig": {
+    "globals": {
+      "chrome": true,
+      "jQuery": true,
+      "$": true
     },
-    "private": true,
-    "author": "soulteary",
-    "license": "MIT",
-    "homepage": "https://github.com/soulteary/fox/tree/chrome-extension",
-    "devDependencies": {
-        "codemirror": "^5.9.0",
-        "css-loader": "^0.23.0",
-        "debug.js": "^1.1.4",
-        "extract-text-webpack-plugin": "^0.9.1",
-        "format": "^0.2.1",
-        "gulp": "^3.9.0",
-        "gulp-clean": "^0.3.1",
-        "gulp-concat": "^2.6.0",
-        "gulp-copy": "0.0.2",
-        "gulp-eslint": "^1.1.1",
-        "gulp-htmlmin": "^1.2.0",
-        "gulp-if": "^2.0.0",
-        "gulp-jsoncombine": "^1.0.3",
-        "gulp-replace": "^0.5.4",
-        "html-webpack-plugin": "^1.7.0",
-        "jquery": "^2.1.4",
-        "js-beautify": "^1.5.10",
-        "less": "^2.5.3",
-        "less-loader": "^2.2.1",
-        "moment": "^2.10.6",
-        "require-dir": "^0.3.0",
-        "string-replace-webpack-plugin": "0.0.2",
-        "style-loader": "^0.13.0",
-        "url-param-parser": "0.0.2",
-        "uuid-js": "^0.7.5",
-        "webpack": "^1.12.9"
+    "rules": {
+      "indent": [
+        2,
+        4,
+        {
+          "SwitchCase": 1
+        }
+      ],
+      "quotes": [
+        2,
+        "single"
+      ],
+      "linebreak-style": [
+        2,
+        "unix"
+      ],
+      "semi": [
+        2,
+        "always"
+      ],
+      "no-trailing-spaces": 2,
+      "space-before-function-paren": [
+        2,
+        "always"
+      ],
+      "eqeqeq": [
+        2,
+        "allow-null"
+      ]
     },
-    "eslintConfig": {
-        "globals": {
-            "chrome": true,
-            "jQuery": true,
-            "$": true
-        },
-        "rules": {
-            "indent": [
-                2,
-                4,
-                {
-                    "SwitchCase": 1
-                }
-            ],
-            "quotes": [
-                2,
-                "single"
-            ],
-            "linebreak-style": [
-                2,
-                "unix"
-            ],
-            "semi": [
-                2,
-                "always"
-            ],
-            "no-trailing-spaces": 2,
-            "space-before-function-paren": [
-                2,
-                "always"
-            ],
-            "eqeqeq": [
-                2,
-                "allow-null"
-            ]
-        },
-        "env": {
-            "browser": true,
-            "node": true
-        },
-        "extends": "eslint:recommended"
-    }
+    "env": {
+      "browser": true,
+      "node": true
+    },
+    "extends": "eslint:recommended"
+  }
 }

@@ -1,0 +1,107 @@
+
+.view-controls {
+  text-align: center;
+
+  h2 {
+    margin: 0;
+    padding: 60px 0 120px;
+    font-size: 30px;
+    line-height: 30px;
+
+    &.title-finish {
+      padding-bottom: 70px;
+    }
+  }
+
+  .btn {
+    float: none;
+    color: #444;
+    display: inline-block;
+    margin: 0;
+    padding: 0 12px;
+    min-width: 52px;
+    min-height: 34px;
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 2px;
+    vertical-align: top;
+    text-align: center;
+    text-overflow: ellipsis;
+    font-size: 16px;
+    line-height: 42px;
+    cursor: pointer;
+  }
+
+  p {
+    font-size: 14px;
+    margin: 0;
+    padding: 0;
+  }
+
+  .desc {
+    height: 26px;
+    line-height: 26px;
+  }
+
+  .btn-stop {
+    border-color: #cc2311;
+    background-color: #ef4e3a;
+    color: #fff;
+
+    &:hover {
+      background-color: #ef2b26;
+    }
+
+    .btn-active {
+      background-color: #ef2b26;
+    }
+  }
+
+  .footer {
+    height: 29px;
+    line-height: 29px;
+    font-size: 14px;
+    color: #bdbaba;
+    border-top: 1px #ddd solid;
+  }
+
+  &.is-initialized, &.is-stopped {
+    .box-start, .title-start {
+      display: block;
+    }
+    .box-finish, .box-stop, .title-finish, .title-stop {
+      display: none;
+    }
+  }
+  &.is-started {
+    .box-stop, .title-stop {
+      display: block;
+    }
+    .box-finish, .box-start, .title-finish, .title-start {
+      display: none;
+    }
+  }
+  &.is-stopped {
+    .box-finish, .title-finish {
+      display: block;
+    }
+    .box-stop, .box-start, .title-stop, .title-start {
+      display: none;
+    }
+
+    .desc {
+      height: 56px;
+      font-size: 12px;
+      line-height: 1.5;
+      text-align: left;
+      padding: 10px;
+    }
+
+    .btn-sync {
+      background-color: #ffb610;
+      border-color: #ffb610;
+      color: #fff;
+    }
+  }
+
+}

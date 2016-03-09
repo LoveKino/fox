@@ -11,7 +11,7 @@ var Toast = require('toast');
 /** debug util **/
 var Debug = require('debug.js');
 
-
+var DataBus = require('data')('network', 'network util暂存数据。');
 /** current module name for debug util **/
 var debugModuleName = '[popup/network]';
 
@@ -40,7 +40,7 @@ function request (name, uriParams, data, success, fail, options) {
      */
     function innerSuccess (response) {
         Toast.hide();
-        //DataBus.set('cs-network-status', '');
+        DataBus.set('cs-network-status', '');
         if (response && response.status && response.status === 'success') {
             Debug.info(debugModuleName, '[请求成功]当前接口:', name, ' 返回内容:', response);
             if (success) {
@@ -63,7 +63,7 @@ function request (name, uriParams, data, success, fail, options) {
      */
     function innerFail (response) {
         Toast.hide();
-        //DataBus.set('cs-network-status', '');
+        DataBus.set('cs-network-status', '');
         Debug.error(debugModuleName, '[请求失败]当前接口:', name, ' 返回内容:', response);
 
         if (response && response.status && response.status === 'fail') {
@@ -88,14 +88,14 @@ function request (name, uriParams, data, success, fail, options) {
     var api = Config.getApiInfo(name, uriParams);
 
     // 判断当前网络状态
-    //var status = DataBus.get('cs-network-status');
+    var status = DataBus.get('cs-network-status');
     // 防止多次提交
     if (status && status === 'locked') {
         // 理论不存在此情况
         Debug.warn(debugModuleName, '正在请求接口中，请勿重复提交。');
         return false;
     } else {
-        //DataBus.set('cs-network-status', 'locked');
+        DataBus.set('cs-network-status', 'locked');
         Toast.data({'text' : '加载中', 'mode' : 'loading'}).show();
 
         var requestOptions = {
@@ -117,11 +117,9 @@ function request (name, uriParams, data, success, fail, options) {
 
         $.ajax(requestOptions);
     }
-
 }
 
 
 module.exports = {
-
     'request' : request
 };

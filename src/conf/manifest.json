@@ -1,6 +1,6 @@
 {
     "manifest_version": 2,
-    "minimum_chrome_version": "34",
+    "minimum_chrome_version": "49",
     "name": "字段配置从package.json中读取",
     "version": "字段配置从package.json中读取",
     "description": "页面行为录制，页面性能监控。",
@@ -22,18 +22,15 @@
         "persistent": true
     },
     "permissions": [
-        "alarms",
-        "webNavigation",
         "tabs",
-        "contextMenus",
         "debugger",
-        "notifications",
         "*://*/",
+        "http://*/",
+        "https://*/",
+        "<all_urls>",
         "webRequest",
         "webRequestBlocking",
-        "<all_urls>",
-        "http://*/",
-        "https://*/"
+        "webNavigation"
     ],
     "web_accessible_resources": [
         "*"
@@ -42,7 +39,7 @@
     "commands": {
         "detect-screenshot": {
             "suggested_key": {
-                "default": "Ctrl+Shift+3"
+                "default": "Ctrl+Shift+1"
             },
             "description": "检测截图",
             "global": true
