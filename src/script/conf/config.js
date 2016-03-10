@@ -102,10 +102,16 @@ var CSS_FN_CLASS = {
     'hide' : 'fn-hide'
 };
 
+
+/**
+ * internal page list
+ * @type {{popup: string, background: string}}
+ */
 var PAGE_LIST = {
     'popup'      : '/page/popup/main.html',
     'background' : '/page/background/main.html'
 };
+
 
 /**
  * get api data by name

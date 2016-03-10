@@ -1,5 +1,7 @@
 /**
  * 统计模块
+ * @deprecated
+ * @todo refactor
  */
 var uuid = require('random').fakeUUID;
 var Data = require('data')('analytics');

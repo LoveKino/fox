@@ -2,7 +2,7 @@
  * 处理工具栏浏览器图标
  */
 
-var debug = require('debug.js');
+var Debug = require('debug.js');
 var debugModuleName = 'common/browser-icon';
 
 var helper = require('helper');
@@ -29,12 +29,8 @@ try {
         updateIcon : updateIcon,
         flip       : flip
     };
-
 } catch (e) {
-    debug.error(debugModuleName, '插件加载出现错误，尝试自动重新加载插件。');
-
-    // 运行时错误，尝试硬性重载环境（重新加载资源）
-    window.location.reload();
+    Debug.error(debugModuleName, '初始化API出错。');
 
     // 避免出现更多错误
     module.exports = {
@@ -46,6 +42,7 @@ try {
         flip       : helper.empty
     };
 }
+
 
 /**
  * 旋转图标
@@ -132,6 +129,7 @@ function pause () {
     setBadgeBackgroundColor({color : [232, 226, 86, 255]});
 }
 
+
 /**
  * 设置开始状态
  */
@@ -140,6 +138,7 @@ function start () {
     setBadgeText({text : '>'});
     setBadgeBackgroundColor({color : [81, 226, 81, 1]});
 }
+
 
 /**
  * 重置状态

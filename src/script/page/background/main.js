@@ -5,11 +5,12 @@ var browserIcon = require('../../common/browser-icon');
 var Extension = require('../../common/extension');
 /** 插件工具栏图标动画 **/
 var recordAnimation = require('../../general/background/icon-animation');
-/** 数据统计 **/
-//var analytics = require('../../general/background/analytics');
 /** 处理chrome网络请求 **/
-/** 帮助函数 **/
-//var helper = require('helper');
+var ChromeNetwork = require('../../general/background/http-network.js');
+/** 错误处理 **/
+var errorHandle = require('../../common/error-handle');
+/** indexedDB操作 **/
+var IndexedDB = require('../../util/indexedDB');
 /** 格式处理 **/
 var vsprintf = require('format').vsprintf;
 /** debug util **/
@@ -25,18 +26,13 @@ var DataBus = localForage.createInstance(
         description : 'background暂存数据库。'
     }
 );
-/** 解析动作 **/
-//var actionParser = require('../../general/background/parse-action');
-/** 消息处理 **/
-//var message = require('../../common/message');
 /** 知识库 **/
 var knowledge = require('../../general/background/knowledge.js');
 /** 网络请求库 **/
-var HttpNetwork = require('../../general/background/http-network.js');
-/** NETWORK UTIL **/
-var Network = require('network');
-/** local user data method for popup **/
-var User = require('../../general/popup/user');
+///** NETWORK UTIL **/
+//var Network = require('network');
+///** local user data method for popup **/
+//var User = require('../../general/popup/user');
 
 /**
  * Record request headers filter by accept mine-type
@@ -44,10 +40,9 @@ var User = require('../../general/popup/user');
  * @returns {{requestHeaders: headers}}
  */
 function processRequestHeaders (details) {
-    var headers = details.requestHeaders;
-    DataBus.getItem('state#' + details.tabId, headerHandle);
 
     function headerHandle (tabRecordState) {
+        var headers = details.requestHeaders;
         /**
          * 事件触发顺序:
          *      chrome.webRequest.onBeforeSendHeaders => chrome.tabs.onUpdated
@@ -67,7 +62,10 @@ function processRequestHeaders (details) {
                         if (value.indexOf('text/html') > -1 || value.indexOf('application/xml') > -1 || value.indexOf('application/xhtml') > -1) {
                             //record current tab request headers
                             Debug.warn(vsprintf('%s 储存当前标签页:[%s]的HTTP请求头', [debugModuleName, details.tabId]));
-                            DataBus.setItem('headers#' + details.tabId, {'headers' : headers});
+                            // async save
+                            DataBus
+                                .setItem('headers#' + details.tabId, {'headers' : headers})
+                                .catch(errorHandle.storage);
                             // per request only contain one accept item
                             break;
                         }
@@ -77,7 +75,14 @@ function processRequestHeaders (details) {
                 return {'requestHeaders' : headers};
         }
     }
+
+    DataBus
+        .getItem('state#' + details.tabId)
+        .then(headerHandle)
+        .catch(errorHandle.storage);
+
 }
+
 
 /**
  * 检查是否为标准的HTTP协议地址
@@ -89,37 +94,46 @@ function isStandardUrl (url) {
 }
 
 
-function syncCaseData (data, tabId, sender) {
-    var userData = User.getUserData();
-    var user = userData.user;
-    var pass = userData.pass;
-
-    if (!(user && pass)) {
-        Debug.warn(vsprintf('%s 用户尚未登录，使用单机模式。', [debugModuleName]));
-        return;
-    }
-    // request api to save case
-    Network.request('saveCase', null, {
-        user : user,
-        pass : pass,
-        data : data
-    }, function (resp) {
-        if (resp && resp.status === 'success') {
-            Debug.info(debugModuleName, 'case to server success');
-            sender.postMessage({'state' : 'SYNC-READY'});
-            DataBus.setItem('sync-state#' + tabId, 'success');
-        }
-    }, function (resp) {
-        Debug.info(debugModuleName, 'case to server fail', resp);
-        sender.postMessage({'state' : 'SYNC-FAILED'});
-        DataBus.setItem('sync-state#' + tabId, 'fail');
-    }, {contentType : 'application/json'});
-}
+//function syncCaseData (data, tabId, sender) {
+//    var userData = User.getUserData();
+//    var user = userData.user;
+//    var pass = userData.pass;
+//
+//    if (!(user && pass)) {
+//        Debug.warn(vsprintf('%s 用户尚未登录，使用单机模式。', [debugModuleName]));
+//        return;
+//    }
+//    // request api to save case
+//    Network.request('saveCase', null, {
+//        user : user,
+//        pass : pass,
+//        data : data
+//    }, function (resp) {
+//        if (resp && resp.status === 'success') {
+//            Debug.info(debugModuleName, 'case to server success');
+//            DataBus
+//                .setItem('sync-state#' + tabId, 'success')
+//                .then(function () {
+//                    return sender.postMessage({'state' : 'SYNC-READY'});
+//                })
+//                .catch(errorHandle.storage);
+//        }
+//    }, function (resp) {
+//        Debug.info(debugModuleName, 'case to server fail', resp);
+//        DataBus
+//            .setItem('sync-state#' + tabId, 'fail')
+//            .then(function () {
+//                return sender.postMessage({'state' : 'SYNC-FAILED'});
+//            })
+//            .catch(errorHandle.storage);
+//    }, {contentType : 'application/json'});
+//}
 
 
 document.addEventListener('DOMContentLoaded', function () {
     Debug.info(vsprintf('%s 插件尝试启动。', [debugModuleName]));
     browserIcon.updateIcon();
+
     /**
      * @param params
      */
@@ -158,6 +172,12 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     try {
+
+        /**
+         * 安装/重载完毕执行清理数据库操作
+         */
+        chrome.runtime.onInstalled.addListener(IndexedDB.cleanUp);
+
         /**
          * 注册长连接给插件不同页面之间使用
          */
@@ -167,7 +187,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 port.onMessage.addListener(function (response) {
                     if (Extension.checkUrlIsInternal(port.sender.url)) {
                         Debug.info(debugModuleName, '来自内部的消息', Extension.getNameByPath(port.sender.url), response);
-                        Debug.info('!!!', response.popup, '!!!');
                         switch (response.popup) {
                             case 'init':
                                 break;
@@ -183,16 +202,20 @@ document.addEventListener('DOMContentLoaded', function () {
                                 });
                                 Recorder.add('record::start', [new Date - 0], 'head');
                                 port.postMessage({'state' : 'started'});
-                                DataBus.removeItem('records#' + response.tabId);
+                                DataBus
+                                    .removeItem('records#' + response.tabId)
+                                    .catch(errorHandle);
                                 break;
                             case 'stop':
                                 Recorder.add('record::finish', [new Date - 0], 'head');
-                                DataBus.setItem('records#' + response.tabId, Recorder.records);
-                                DataBus.removeItem('state#' + response.tabId);
-                                //DataBus.setItem('state#' + response.tabId, 'stopped');
-                                Recorder.reset();
-                                port.postMessage({'state' : 'stop'});
-                                syncCaseData(Recorder.records, response.tabId, port);
+                                DataBus
+                                    .setItem('records#' + response.tabId, Recorder.records)
+                                    .then(function () {
+                                        Recorder.reset();
+                                        return port.postMessage({'state' : 'stop', 'tabId' : response.tabId});
+                                    })
+                                    .catch(errorHandle);
+                                //syncCaseData(Recorder.records, response.tabId, port);
                                 break;
                         }
                     } else {
@@ -214,17 +237,21 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (isStandardUrl(tab.url)) {
                 setPopup(tab.id, 'page/popup/main.html');
-                DataBus.setItem('info#' + tab.id, tab);
+                DataBus
+                    .setItem('info#' + tab.id, tab)
+                    .catch(errorHandle);
             } else {
                 setPopup(tab.id, knowledge.showTopic('error', 'not-allow-page', false));
-                DataBus.removeItem('info#' + tab.id);
+                DataBus
+                    .removeItem('info#' + tab.id)
+                    .catch(errorHandle);
             }
             chrome.browserAction.setBadgeText({text : behaviourCount || ''});
         };
 
 
         Debug.log(debugModuleName, '开始监听网络请求并捕获页面请求头。');
-        HttpNetwork.request(processRequestHeaders);
+        ChromeNetwork.request(processRequestHeaders);
 
         /**
          * 绑定标签状态更新事件
@@ -246,10 +273,17 @@ document.addEventListener('DOMContentLoaded', function () {
             if (tabs && tabs.length) setPopupDetail(tabs[0]);
         });
 
-        var port = chrome.runtime.connect({'from' : 'background', 'to' : '*'});
+        var port = chrome.runtime.connect({'name' : 'popup'});
         port.postMessage({'background' : 'background ready.'});
 
     } catch (e) {
-//        location.reload();
+
+        // 出现错误，优先清理数据库
+        IndexedDB.cleanUp();
+
+        Debug.warn(debugModuleName, '插件加载出现错误，尝试自动重新加载插件。');
+
+        // 运行时错误，尝试硬性重载环境（重新加载资源）
+        window.location.reload();
     }
 });

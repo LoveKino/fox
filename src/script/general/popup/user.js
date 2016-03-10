@@ -12,23 +12,32 @@ var DataBus = localForage.createInstance(
 var Debug = require('debug.js');
 /** current module name for debug util **/
 var debugModuleName = '[popup/user]';
-
+var errorHandle = require('../../common/error-handle');
 
 module.exports = {
     'getUserData' : function () {
         /** user login data from local **/
-        var userData = DataBus.getItem('user');
-        Debug.info(debugModuleName, '获取用户信息', userData);
-        return userData || {'user' : '', 'pass' : ''};
+        return DataBus
+            .getItem('user')
+            .then(function (userData) {
+                Debug.info(debugModuleName, '获取用户信息', userData);
+                return userData || {'user' : '', 'pass' : ''};
+            }).catch(errorHandle.storage);
     },
     'login'       : function (user, pass) {
-        DataBus.setItem('user', {'user' : user, 'pass' : pass});
-        var userData = DataBus.getItem('user');
-        return userData.user && userData.pass;
+        return DataBus
+            .setItem('user', {'user' : user, 'pass' : pass})
+            .then(DataBus.getItem('user'))
+            .then(function (userData) {
+                return userData.user && userData.pass;
+            }).catch(errorHandle.storage);
     },
     'logout'      : function () {
-        DataBus.removeItem('user');
-        var userData = DataBus.getItem('user');
-        return !(userData.user || userData.pass);
+        return DataBus
+            .removeItem('user')
+            .then(DataBus.getItem('user'))
+            .then(function (userData) {
+                return !(userData.user || userData.pass);
+            }).catch(errorHandle.storage);
     }
 };

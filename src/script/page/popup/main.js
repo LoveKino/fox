@@ -17,33 +17,16 @@ var DataBus = localForage.createInstance(
 var Debug = require('debug.js');
 /** current module name for debug util **/
 var debugModuleName = '[popup/main]';
+/** 格式处理 **/
+var vsprintf = require('format').vsprintf;
 
 var container = $('.view-controls');
 var heart = $('#heart');
 
 var port = chrome.runtime.connect({'name' : 'background'});
-
 port.postMessage({'popup' : 'init'});
-port.onMessage.addListener(function (msg) {
-    Debug.info(debugModuleName, msg);
-});
 
-/**
- * 注册长连接给插件不同页面之间使用
- */
-chrome.runtime.onConnect.addListener(function (port) {
-    Debug.info(debugModuleName, '插件通信端口连接成功:', port);
-    if (port.name === 'popup' || port.name === '*') {
-        port.onMessage.addListener(function (response) {
-            Debug.info(debugModuleName, '收到外部消息:', response);
-            if (Extension.checkUrlIsInternal(port.sender.url)) {
-                Debug.info(debugModuleName, '!!!', response);
-            } else {
-                Debug.info(debugModuleName, '@2@', response);
-            }
-        });
-    }
-});
+var errorHandle = require('../../common/error-handle');
 
 
 /**
@@ -61,6 +44,7 @@ function currentTab (success, fail) {
     });
 }
 
+
 /**
  * Send message to inject script
  * @param tab
@@ -71,9 +55,11 @@ function sendMessage (tab, data, callback) {
     chrome.tabs.sendMessage(tab.id, data, callback ? callback: function () {});
 }
 
+
 function toggleReload () {
     $('.reload-bar').removeClass('fn-hide');
 }
+
 
 /**
  * Toggle heart beat speed
@@ -82,11 +68,18 @@ function toggleHeart () {
     $('#heart').toggleClass('slow-beat fast-beat');
 }
 
+
+
 /**
  * Adjust popup view state
  */
 function adjustState (tab) {
-    DataBus.getItem('state#' + tab.id, function (state) {
+    DataBus
+        .getItem('state#' + tab.id)
+        .then(process)
+        .catch(errorHandle.storage);
+
+    function process (state) {
         Debug.info(debugModuleName, '调整状态, 当前状况:', state);
         switch (state) {
             case 'started':
@@ -103,17 +96,19 @@ function adjustState (tab) {
                 heart.fadeOut();
                 $('#sync-data').fadeIn();
 
-                //
-                var sync = DataBus.getItem('sync-state#' + tab.id);
-
-                if (sync === 'success') {
-                    $('.btn-sync').text('传输数据完毕');
-                } else if (sync === 'fail') {
-                    $('.btn-sync').text('传输数据失败');
-                } else {
-                    $('.btn-sync').text('插件出错');
-                    toggleReload();
-                }
+                DataBus
+                    .getItem('sync-state#' + tab.id)
+                    .then(function (sync) {
+                        if (sync === 'success') {
+                            $('.btn-sync').text('传输数据完毕');
+                        } else if (sync === 'fail') {
+                            $('.btn-sync').text('传输数据失败');
+                        } else {
+                            $('.btn-sync').text('插件出错');
+                            toggleReload();
+                        }
+                    })
+                    .catch(errorHandle.storage);
 
                 break;
             default :
@@ -123,8 +118,9 @@ function adjustState (tab) {
                 container.removeClass('is-stopped is-started');
                 break;
         }
-    });
+    }
 }
+
 
 function init (targetTab) {
 
@@ -134,12 +130,15 @@ function init (targetTab) {
             Debug.info(debugModuleName, '用户点击插件栏重载插件按钮，发送消息:', resp);
             switch (resp) {
                 case 'INJECT-PAGE-RELOAD':
-                    DataBus.clear();
-
-                    //window.close() &&
-                    setTimeout(function () {
-                        chrome.runtime.reload();
-                    }, 500);
+                    DataBus
+                        .clear()
+                        .then(function () {
+                            //window.close() &&
+                            setTimeout(function () {
+                                chrome.runtime.reload();
+                            }, 500);
+                        })
+                        .catch(errorHandle.storage);
                     break;
                 default :
                     Debug.info(debugModuleName, '重启失败，页面尚未刷新。');
@@ -161,12 +160,16 @@ function init (targetTab) {
         port.onMessage.addListener(function (response) {
             if (response.state === 'started') {
                 Debug.log(debugModuleName, '收到BG开始录制消息。');
-                DataBus.setItem('state#' + targetTab.id, 'started');
-                sendMessage(targetTab, {'APP:MSG' : 'START-RECORD'}, function (response) {
-                    Debug.info(debugModuleName, '用户主动发送开始请求,响应内容:', response);
-                    //window.close() &&
-                    setTimeout(function () {adjustState(targetTab);}, 1000);
-                });
+                DataBus
+                    .setItem('state#' + targetTab.id, 'started')
+                    .then(function () {
+                        return sendMessage(targetTab, {'APP:MSG' : 'START-RECORD'}, function (response) {
+                            Debug.info(debugModuleName, '用户主动发送开始请求,响应内容:', response);
+                            //window.close() &&
+                            setTimeout(function () {adjustState(targetTab);}, 1000);
+                        });
+                    })
+                    .catch(errorHandle.storage);
             } else {
                 Debug.warn('BG未准备好录制事件。');
             }
@@ -185,15 +188,23 @@ function init (targetTab) {
             sendMessage(targetTab, {'APP:MSG' : 'STOP-RECORD'}, function (response) {
                 Debug.info(debugModuleName, '用户主动发送结束请求,响应内容:', response);
             });
-            switch (response.state) {
-                case 'SYNC-READY':
-                    btnSync.text('传输数据完毕');
-                    break;
-                case 'SYNC-FAILED':
-                    btnSync.text('传输数据失败');
-                    break;
-            }
-            adjustState(targetTab);
+
+            DataBus
+                .setItem('state#' + response.tabId, 'stopped')
+                .then(function () {
+                    adjustState(targetTab);
+
+                    // todo split
+                    switch (response.state) {
+                        case 'SYNC-READY':
+                            btnSync.text('传输数据完毕');
+                            break;
+                        case 'SYNC-FAILED':
+                            btnSync.text('传输数据失败');
+                            break;
+                    }
+                })
+                .catch(errorHandle);
         });
     });
 
@@ -201,31 +212,48 @@ function init (targetTab) {
 }
 
 
-currentTab(
-    function (targetTab) {
-        /**
-         * send popup shown message to inject script
-         */
-        sendMessage(targetTab, {'APP:MSG' : 'POPUP-SHOWN'}, function (resp) {
-            Debug.info(debugModuleName, '弹出窗已被展示', resp);
-            if (!resp) {
+document.addEventListener('DOMContentLoaded', function () {
+    Debug.info(vsprintf('%s 插件尝试启动。', [debugModuleName]));
 
-                port.postMessage({'popup' : 'shown', 'tabId' : targetTab.id});
-                port.onMessage.addListener(function (response) {
-                    Debug.info(debugModuleName, response);
-                    //DataBus.removeItem('state#' + targetTab.id);
-                    adjustState(targetTab);
-                });
-            }
-            init(targetTab);
-        });
+    /**
+     * 注册长连接给插件不同页面之间使用
+     */
+    chrome.runtime.onConnect.addListener(function (port) {
+        Debug.info(debugModuleName, '插件通信端口连接成功:', port);
+        if (port.name === 'popup' || port.name === '*') {
+            port.onMessage.addListener(function (response) {
+                Debug.info(debugModuleName, '收到外部消息:', response);
+                if (Extension.checkUrlIsInternal(port.sender.url)) {
+                    Debug.info(debugModuleName, '!!!', response);
+                } else {
+                    Debug.info(debugModuleName, '@2@', response);
+                }
+            });
+        }
+    });
 
-    },
-    function () {
-        Debug.error(debugModuleName, '获取当前tab信息出错。');
-        toggleReload();
-    }
-);
+    currentTab(
+        function (targetTab) {
+            /**
+             * send popup shown message to inject script
+             */
+            sendMessage(targetTab, {'APP:MSG' : 'POPUP-SHOWN'}, function (resp) {
+                Debug.info(debugModuleName, '弹出窗已被展示', resp);
+                if (!resp) {
+                    port.postMessage({'popup' : 'shown', 'tabId' : targetTab.id});
+                    port.onMessage.addListener(function (response) {
+                        Debug.info(debugModuleName, response);
+                        //DataBus.removeItem('state#' + targetTab.id);
+                        adjustState(targetTab);
+                    });
+                }
+                init(targetTab);
+            });
 
-
-
+        },
+        function () {
+            Debug.error(debugModuleName, '获取当前tab信息出错。');
+            toggleReload();
+        }
+    );
+});

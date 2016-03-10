@@ -43,7 +43,6 @@ function getNameByPath (path) {
  * 判断链接是否为内容页面
  * @param url
  * @returns {boolean}
- * @todo 先简化路径，再匹配，提高性能
  */
 var checkUrlIsInternal = function (url) {
     var relativePath = url.split(extensionHost);
