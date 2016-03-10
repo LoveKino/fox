@@ -54,6 +54,9 @@
             }
             ;
         for (; i < n; ++i) {
+
+            if (typeof fmt[i] !== 'string') fmt[i] = JSON.stringify(fmt[i]);
+
             c = fmt[i];
             if (escaped) {
                 escaped = false;

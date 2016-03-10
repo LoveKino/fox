@@ -29,10 +29,10 @@ var DataBus = localForage.createInstance(
 /** 知识库 **/
 var knowledge = require('../../general/background/knowledge.js');
 /** 网络请求库 **/
-///** NETWORK UTIL **/
-//var Network = require('network');
-///** local user data method for popup **/
-//var User = require('../../general/popup/user');
+/** NETWORK UTIL **/
+var Network = require('network');
+/** local user data method for popup **/
+var User = require('../../general/popup/user');
 
 /**
  * Record request headers filter by accept mine-type
@@ -94,40 +94,54 @@ function isStandardUrl (url) {
 }
 
 
-//function syncCaseData (data, tabId, sender) {
-//    var userData = User.getUserData();
-//    var user = userData.user;
-//    var pass = userData.pass;
-//
-//    if (!(user && pass)) {
-//        Debug.warn(vsprintf('%s 用户尚未登录，使用单机模式。', [debugModuleName]));
-//        return;
-//    }
-//    // request api to save case
-//    Network.request('saveCase', null, {
-//        user : user,
-//        pass : pass,
-//        data : data
-//    }, function (resp) {
-//        if (resp && resp.status === 'success') {
-//            Debug.info(debugModuleName, 'case to server success');
-//            DataBus
-//                .setItem('sync-state#' + tabId, 'success')
-//                .then(function () {
-//                    return sender.postMessage({'state' : 'SYNC-READY'});
-//                })
-//                .catch(errorHandle.storage);
-//        }
-//    }, function (resp) {
-//        Debug.info(debugModuleName, 'case to server fail', resp);
-//        DataBus
-//            .setItem('sync-state#' + tabId, 'fail')
-//            .then(function () {
-//                return sender.postMessage({'state' : 'SYNC-FAILED'});
-//            })
-//            .catch(errorHandle.storage);
-//    }, {contentType : 'application/json'});
-//}
+function syncCaseData (data, tabId, sender) {
+
+    User.getUserData().then(function (userData) {
+
+        Debug.warn(vsprintf('%s 获取用户数据: %s', [debugModuleName, userData]));
+
+        var user = null;
+        var pass = null;
+
+        if (userData) {
+            user = userData.user;
+            pass = userData.pass;
+        }
+
+        //todo: 显示在popup上
+        if (!(user && pass)) {
+            Debug.warn(vsprintf('%s 用户尚未登录，使用单机模式。', [debugModuleName]));
+            return sender.postMessage({'state' : 'SYNC-FAILED-WITHOUT-USER-LOGIN'});
+        }
+
+        // request api to save case
+        Network.request('saveCase', null, {
+            user : user,
+            pass : pass,
+            data : data
+        }, function (resp) {
+            if (resp && resp.status === 'success') {
+                Debug.info(debugModuleName, 'case to server success');
+                DataBus
+                    .setItem('sync-state#' + tabId, 'success')
+                    .then(function () {
+                        return sender.postMessage({'state' : 'syncing', 'result' : 'success', 'tabId' : tabId});
+                    })
+                    .catch(errorHandle.storage);
+            }
+        }, function (resp) {
+            Debug.info(debugModuleName, 'case to server fail', resp);
+            DataBus
+                .setItem('sync-state#' + tabId, 'fail')
+                .then(function () {
+                    return sender.postMessage({'state' : 'syncing', 'result' : 'failed', 'tabId' : tabId});
+                })
+                .catch(errorHandle.storage);
+        }, {contentType : 'application/json'});
+
+    });
+
+}
 
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -189,9 +203,11 @@ document.addEventListener('DOMContentLoaded', function () {
                         Debug.info(debugModuleName, '来自内部的消息', Extension.getNameByPath(port.sender.url), response);
                         switch (response.popup) {
                             case 'init':
+                                port.postMessage({'state' : 'know-init'});
                                 break;
                             case 'shown':
                                 DataBus.removeItem('records#' + response.id);
+                                port.postMessage({'state' : 'know-shown'});
                                 break;
                             case 'start':
                                 Recorder.start({
@@ -201,7 +217,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                     'url'    : response.url
                                 });
                                 Recorder.add('record::start', [new Date - 0], 'head');
-                                port.postMessage({'state' : 'started'});
+                                port.postMessage({'tabId' : response.tabId, 'state' : 'recorder-started'});
                                 DataBus
                                     .removeItem('records#' + response.tabId)
                                     .catch(errorHandle);
@@ -212,10 +228,15 @@ document.addEventListener('DOMContentLoaded', function () {
                                     .setItem('records#' + response.tabId, Recorder.records)
                                     .then(function () {
                                         Recorder.reset();
-                                        return port.postMessage({'state' : 'stop', 'tabId' : response.tabId});
+                                        return port.postMessage({
+                                            'tabId' : response.tabId,
+                                            'state' : 'recorder-finished'
+                                        });
                                     })
                                     .catch(errorHandle);
-                                //syncCaseData(Recorder.records, response.tabId, port);
+                                break;
+                            case 'sync':
+                                syncCaseData(Recorder.records, response.tabId, port);
                                 break;
                         }
                     } else {

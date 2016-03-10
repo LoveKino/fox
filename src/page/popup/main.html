@@ -16,7 +16,11 @@
 
         <h2 class="title-finish">录制完成</h2>
 
-        <div id="heart" class="slow-beat"></div>
+        <h2 class="title-error">录制出错</h2>
+
+        <h2 class="title-sync">同步数据</h2>
+
+        <div id="heart"></div>
 
         <div id="sync-data">
             <div class="ball"></div>
@@ -44,15 +48,28 @@
 
         <div class="box box-finish">
             <p>
-                <button class="btn btn-sync" disabled>正在传输数据</button>
+                <button class="btn btn-begin-sync">同步数据</button>
             </p>
-            <p class="desc">录制当前页面行为完毕，正在进行数据传输。如果想要开始新的录制，请先刷新或者打开新页面。</p>
+            <p class="desc">请打开桌面客户端哟！</p>
+        </div>
+
+        <div class="box box-error">
+            <p>
+                <button class="btn btn-reload">重启插件</button>
+            </p>
+            <p class="desc">录制过程出错。</p>
+        </div>
+
+        <div class="box box-sync">
+            <p>
+                <button class="btn btn-sync">正在传输数据</button>
+            </p>
+            <p class="desc">正在进行数据传输。</p>
         </div>
 
         <div class="footer">
             <div class="version">
                 <span>v0.2.2</span>
-                <span class="reload-bar fn-hide"> - 出现问题？<a href="#" class="btn-reload">重启插件</a>。</span>
             </div>
         </div>
     </div>

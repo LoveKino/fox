@@ -21,7 +21,7 @@ module.exports = {
             .getItem('user')
             .then(function (userData) {
                 Debug.info(debugModuleName, '获取用户信息', userData);
-                return userData || {'user' : '', 'pass' : ''};
+                return userData || {'user' : 'default', 'pass' : 'default'};
             }).catch(errorHandle.storage);
     },
     'login'       : function (user, pass) {
