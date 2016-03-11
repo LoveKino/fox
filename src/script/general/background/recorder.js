@@ -5,8 +5,9 @@
 /** debug util **/
 var Debug = require('debug.js');
 var debugModuleName = '[background/recorder]';
-
+/** helper util **/
 var helper = require('helper');
+
 
 /**
  * 当前程序运行模式
@@ -29,6 +30,7 @@ var injectFile = runMode === 'PRODUCTION' ? '/script/inject.min.js': '/script/in
  */
 var actionRecords = {};
 
+
 /**
  * 记录行为消息
  * @param tabId
@@ -36,7 +38,13 @@ var actionRecords = {};
  * @returns {boolean}
  */
 function record (tabId, action) {
-    Debug.log(debugModuleName, '接收页面记录到的行为:', action);
+
+    if (helper.is.array(tabId) && tabId.length === 2) {
+        action = tabId[1];
+        tabId = tabId[0];
+    }
+
+    Debug.error(debugModuleName, '接收页面记录到的行为:', tabId, action);
 
     if (actionRecords.hasOwnProperty(tabId)) {
         Debug.warn(debugModuleName, '有当前tabId属性:', actionRecords[tabId]);
@@ -55,6 +63,7 @@ function record (tabId, action) {
     actionRecords[tabId].push(action);
 }
 
+
 /**
  * 获取当前录制的行为列表
  * @param tabId
@@ -67,6 +76,7 @@ function getData (tabId) {
         return false;
     }
 }
+
 
 /**
  * 向事件队列手动插入行为
@@ -103,10 +113,6 @@ function actionWrapper (eventGroup, eventType, data) {
     return result;
 }
 
-function detectScreenshots (command) {
-    if (command === 'detect-screenshot') record(actionWrapper('SYSTEM::CMD', 'screenshot', {'fileName' : 'index.png'}));
-}
-
 
 function detectUrl (details) {
     var type = details.transitionType;
@@ -117,9 +123,9 @@ function detectUrl (details) {
     switch (type) {
         case 'reload':
             if (!actionRecords.length) {
-                action = record(actionWrapper('BROWSER::CMD', 'open', {'url' : details.url}));
+                action = record(details.tabId, actionWrapper('BROWSER::CMD', 'open', {'url' : details.url}));
             } else {
-                action = record(actionWrapper('BROWSER::CMD', 'reload', {'url' : details.url}));
+                action = record(details.tabId, actionWrapper('BROWSER::CMD', 'reload', {'url' : details.url}));
             }
             break;
         case 'typed':
@@ -127,16 +133,17 @@ function detectUrl (details) {
                 from[0] === 'from_address_bar' ||
                 from[0] === 'server_redirect' && from[1] === 'from_address_bar'
             ) {
-                action = record(actionWrapper('BROWSER::CMD', 'open', {'url' : details.url}));
+                action = record(details.tabId, actionWrapper('BROWSER::CMD', 'open', {'url' : details.url}));
             }
             break;
         case 'auto_bookmark':
-            action = record(actionWrapper('BROWSER::CMD', 'open', {'url' : details.url}));
+            action = record(details.tabId, actionWrapper('BROWSER::CMD', 'open', {'url' : details.url}));
             break;
     }
 
     return action;
 }
+
 
 /**
  * 页面注入监听事件脚本
@@ -152,6 +159,8 @@ function injectEventScript (tab) {
             'height' : tab.height,
             'url'    : tab.url
         }));
+
+        chrome.tabs.executeScript(tab.id, {code : 'window.__fox__tabId = ' + tab.id + ';'});
         chrome.tabs.executeScript(tab.id, {file : injectFile});
     } else {
         Debug.error(debugModuleName, '插件不支持运行在非标准页面下。');
@@ -160,7 +169,6 @@ function injectEventScript (tab) {
 
 
 function startRecord (tab) {
-    chrome.commands.onCommand.addListener(detectScreenshots);
     chrome.webNavigation.onCommitted.addListener(detectUrl);
     // @notice:插入脚本后会触发消息通信，故置于onMessage前
     injectEventScript(tab);
@@ -169,7 +177,6 @@ function startRecord (tab) {
 
 
 function resetRecord () {
-    chrome.commands.onCommand.removeListener(detectScreenshots);
     chrome.webNavigation.onCommitted.removeListener(detectUrl);
     chrome.runtime.onMessage.removeListener(record);
 }

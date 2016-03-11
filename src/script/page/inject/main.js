@@ -4,10 +4,12 @@ var debug = require('debug.js');
 var debugModuleName = '[inject/main]';
 
 var piecon = require('../../general/inject/piecon');
-piecon.setOptions({'useCache' : true, 'fallback' : false});
+piecon.setOptions({'useCache' : true});
 
 var helper = require('helper');
 var getCssPath = require('../../general/inject/get-css-path');
+
+var tabId = window.__fox__tabId;
 
 var inst = null;
 
@@ -102,7 +104,7 @@ Instance.prototype.sendMessage = function (eventGroup, eventType, nodeOrData) {
     }
 
     if (isValidChromeRuntime()) {
-        chrome.runtime.sendMessage(message);
+        chrome.runtime.sendMessage(chrome.runtime.id, [tabId, message]);
     } else {
         this.deInit();
     }
@@ -392,3 +394,5 @@ inst.init();
 if (window.navigator) {
     inst.sendMessage('USER::CMD', 'visit', {ua : window.navigator.userAgent});
 }
+
+debug.error('!!!', window, window.__fox__);

@@ -1,7 +1,7 @@
 {
   "name": "Fox",
   "subTitle": "Fox client for Chrome.",
-  "version": "0.2.2",
+  "version": "0.2.4",
   "description": "Fox is a chrome extension which help you do something better: User Interface Testing/ Replay/ Monitor/ Analytics.",
   "main": "Gulpfile.js",
   "scripts": {

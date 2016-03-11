@@ -104,6 +104,7 @@ function sendMessage (tab, data, callback) {
     chrome.tabs.sendMessage(tab.id, data, callback ? callback: function () {});
 }
 
+
 /**
  * Adjust popup view state
  */

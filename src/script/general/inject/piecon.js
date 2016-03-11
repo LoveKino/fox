@@ -17,26 +17,10 @@ var options = {};
 var defaults = {
     color      : '#ff0084',
     background : '#bbb',
-    shadow     : '#fff',
-    fallback   : false
+    shadow     : '#fff'
 };
 
 var isRetina = window.devicePixelRatio > 1;
-
-var ua = (function () {
-    var agent = navigator.userAgent.toLowerCase();
-    return function (browser) {
-        return agent.indexOf(browser) !== -1;
-    };
-}());
-
-var browser = {
-    ie      : ua('msie'),
-    chrome  : ua('chrome'),
-    webkit  : ua('chrome') || ua('safari'),
-    safari  : ua('safari') && !ua('chrome'),
-    mozilla : ua('mozilla') && !ua('chrome') && !ua('safari')
-};
 
 var getFaviconTag = function () {
     var links = document.getElementsByTagName('link');
@@ -132,14 +116,6 @@ var drawFavicon = function (percentage) {
     }
 };
 
-var updateTitle = function (percentage) {
-    if (percentage > 0) {
-        document.title = '(' + percentage + '%) ' + originalTitle;
-    } else {
-        document.title = originalTitle;
-    }
-};
-
 Piecon.setOptions = function (custom) {
     options = {};
 
@@ -161,13 +137,6 @@ Piecon.setProgress = function (percentage) {
     }
 
     if (!isNaN(parseFloat(percentage)) && isFinite(percentage)) {
-        if (!getCanvas().getContext || browser.ie || browser.safari || options.fallback === true) {
-            // Fallback to updating the browser title if unsupported
-            return updateTitle(percentage);
-        } else if (options.fallback === 'force') {
-            updateTitle(percentage);
-        }
-
         return drawFavicon(percentage);
     }
 

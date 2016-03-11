@@ -28,6 +28,10 @@ gulp.task('html', ['pack'], function () {
             projectConf.name
         ))
         .pipe(replace(
+            /\<%VERSION%\>/g,
+            projectConf.version
+        ))
+        .pipe(replace(
             /\<%RUN_MODE%\>/g,
             flag.isProduction && !flag.enableDebug ? 'PRODUCTION': 'DEVELOPMENT'
         ))

@@ -216,14 +216,14 @@ document.addEventListener('DOMContentLoaded', function () {
                                     'height' : response.height,
                                     'url'    : response.url
                                 });
-                                Recorder.add('record::start', [new Date - 0], 'head');
+                                Recorder.add(response.tabId, 'record::start', [new Date - 0], 'head');
                                 port.postMessage({'tabId' : response.tabId, 'state' : 'recorder-started'});
                                 DataBus
                                     .removeItem('records#' + response.tabId)
                                     .catch(errorHandle);
                                 break;
                             case 'stop':
-                                Recorder.add('record::finish', [new Date - 0], 'head');
+                                Recorder.add(response.tabId, 'record::finish', [new Date - 0], 'head');
                                 DataBus
                                     .setItem('records#' + response.tabId, Recorder.records)
                                     .then(function () {
