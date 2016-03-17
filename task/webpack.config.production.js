@@ -16,8 +16,9 @@ config.entry = [
     './src/static/atom-ui.less',
     './src/static/module/welcome.less',
     './src/static/module/tabs.less',
-    './src/static/atom-dark-ui.less',
     './src/static/module/status-bar.less',
+    './src/static/atom-dark-ui.less',
+    './src/static/module/record/index.less',
     './app/index'
 ];
 

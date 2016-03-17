@@ -1,6 +1,8 @@
 var crypto = require('crypto');
 var fs = require('fs');
 
+var userHome = require('user-home');
+let foxWorkDir = userHome + '/.fox-workspace';
 
 function md5 (str) {
     var hash = crypto.createHash('md5');
@@ -33,6 +35,23 @@ function readJson (path) {
     }
 }
 
+function listDir (path) {
+    if (isExists(path)) {
+        const fileList = fs.readdirSync(path);
+        let result = [];
+
+        for (var i = 0, j = fileList.length; i < j; i++) {
+            if (fileList[i] !== '.DS_Store') {
+                result.push(fileList[i]);
+            }
+        }
+        return result;
+    } else {
+        return [];
+    }
+}
+
+
 /**
  * 获取用户目录
  * @param data
@@ -42,7 +61,7 @@ function getUsrPath (data) {
     if (!data.user || !data.pass) {
         return false;
     } else {
-        var baseUsrDir = md5(data.user);
+        var baseUsrDir = [foxWorkDir, md5(data.user)].join('/');
         var usrProfile = [baseUsrDir, md5(data.pass)].join('/') + '.profile';
 
         return {
@@ -80,11 +99,16 @@ function hereDoc () {
     }
 }
 
+if (!isExists(foxWorkDir)) {
+    fs.mkdirSync(foxWorkDir);
+}
+
 export default {
     'md5'        : md5,
     'isExists'   : isExists,
     'writeJson'  : writeJson,
     'readJson'   : readJson,
     'getUsrPath' : getUsrPath,
-    'hereDoc'    : hereDoc
+    'hereDoc'    : hereDoc,
+    'listDir'    : listDir
 };

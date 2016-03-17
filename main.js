@@ -4,6 +4,7 @@
 const PROJECT_INFO = require('./package.json');
 const ProductName = PROJECT_INFO.productName;
 const ProductCompany = PROJECT_INFO.companyName;
+const DefaultUser = PROJECT_INFO.defaultUser;
 
 const electron = require('electron');
 const app = electron.app;
@@ -17,6 +18,7 @@ let mainWindow = null;
 
 // load api
 const apiServer = require('./app/utils/api');
+const userApi = require('./app/api/user');
 
 crashReporter.start({
     productName : ProductName,
@@ -40,6 +42,9 @@ app.on('ready', () => {
     // apiServer('stop');
     apiServer('start');
 
+    // init default user
+    userApi('register', DefaultUser);
+
     if (process.env.HOT) {
         mainWindow.loadURL(`file://${__dirname}/app/hot-dev-app.html`);
     } else {
@@ -52,6 +57,9 @@ app.on('ready', () => {
 
     if (process.env.NODE_ENV === 'development') {
         mainWindow.openDevTools();
+
+        BrowserWindow.addDevToolsExtension('/Users/soulteary/fox/react-devtools/shells/chrome');
+
     }
 
     if (process.platform === 'darwin') {
@@ -88,98 +96,98 @@ app.on('ready', () => {
                 }
             }]
         }, {
-            label   : 'Edit',
+            label   : '编辑',
             submenu : [{
-                label       : 'Undo',
+                label       : '撤销',
                 accelerator : 'Command+Z',
                 selector    : 'undo:'
             }, {
-                label       : 'Redo',
+                label       : '重做',
                 accelerator : 'Shift+Command+Z',
                 selector    : 'redo:'
             }, {
                 type : 'separator'
             }, {
-                label       : 'Cut',
+                label       : '剪切',
                 accelerator : 'Command+X',
                 selector    : 'cut:'
             }, {
-                label       : 'Copy',
+                label       : '复制',
                 accelerator : 'Command+C',
                 selector    : 'copy:'
             }, {
-                label       : 'Paste',
+                label       : '粘贴',
                 accelerator : 'Command+V',
                 selector    : 'paste:'
             }, {
-                label       : 'Select All',
+                label       : '全选',
                 accelerator : 'Command+A',
                 selector    : 'selectAll:'
             }]
         }, {
-            label   : 'View',
+            label   : '查看',
             submenu : (true || process.env.NODE_ENV === 'development') ? [{
-                label       : 'Reload',
+                label       : '刷新',
                 accelerator : 'Command+R',
                 click () {
                     mainWindow.restart();
                 }
             }, {
-                label       : 'Toggle Full Screen',
+                label       : '全屏模式',
                 accelerator : 'Ctrl+Command+F',
                 click () {
                     mainWindow.setFullScreen(!mainWindow.isFullScreen());
                 }
             }, {
-                label       : 'Toggle Developer Tools',
+                label       : '切换展示开发者工具',
                 accelerator : 'Alt+Command+I',
                 click () {
                     mainWindow.toggleDevTools();
                 }
             }]: [{
-                label       : 'Toggle Full Screen',
+                label       : '全屏模式',
                 accelerator : 'Ctrl+Command+F',
                 click () {
                     mainWindow.setFullScreen(!mainWindow.isFullScreen());
                 }
             }]
         }, {
-            label   : 'Window',
+            label   : '窗口',
             submenu : [{
-                label       : 'Minimize',
+                label       : '最小化',
                 accelerator : 'Command+M',
                 selector    : 'performMiniaturize:'
             }, {
-                label       : 'Close',
+                label       : '关闭',
                 accelerator : 'Command+W',
                 selector    : 'performClose:'
             }, {
                 type : 'separator'
             }, {
-                label    : 'Bring All to Front',
+                label    : '前置窗口',
                 selector : 'arrangeInFront:'
             }]
         }, {
-            label   : 'Help',
+            label   : '帮助',
             submenu : [{
-                label : 'Learn More',
+                label : '了解更多',
                 click () {
-                    shell.openExternal('http://electron.atom.io');
+                    shell.openExternal('https://github.com/soulteary/fox');
                 }
             }, {
-                label : 'Documentation',
+                label : '查看文档',
                 click () {
-                    shell.openExternal('https://github.com/atom/electron/tree/master/docs#readme');
+                    shell.openExternal('https://github.com/soulteary/fox/tree/desktop-application');
                 }
             }, {
-                label : 'Community Discussions',
+                label : '社区讨论',
                 click () {
-                    shell.openExternal('https://discuss.atom.io/c/electron');
+                    shell.openExternal('https://github.com/soulteary/fox/issues');
                 }
             }, {
-                label : 'Search Issues',
+                label : '搜索ISSUE',
                 click () {
-                    shell.openExternal('https://github.com/atom/electron/issues');
+                    shell.openExternal('https://github.com/soulteary/fox/issues');
                 }
             }]
         }];
@@ -188,65 +196,65 @@ app.on('ready', () => {
         Menu.setApplicationMenu(menu);
     } else {
         template = [{
-            label   : '&File',
+            label   : '文件(&F)',
             submenu : [{
-                label       : '&Open',
+                label       : '打开(&O)',
                 accelerator : 'Ctrl+O'
             }, {
-                label       : '&Close',
+                label       : '关闭(&C)',
                 accelerator : 'Ctrl+W',
                 click () {
                     mainWindow.close();
                 }
             }]
         }, {
-            label   : '&View',
+            label   : '查看(&V)',
             submenu : (process.env.NODE_ENV === 'development') ? [{
-                label       : '&Reload',
+                label       : '刷新(&R)',
                 accelerator : 'Ctrl+R',
                 click () {
                     mainWindow.restart();
                 }
             }, {
-                label       : 'Toggle &Full Screen',
+                label       : '全屏模式(&F)',
                 accelerator : 'F11',
                 click () {
                     mainWindow.setFullScreen(!mainWindow.isFullScreen());
                 }
             }, {
-                label       : 'Toggle &Developer Tools',
+                label       : '切换展示开发者工具(&D)',
                 accelerator : 'Alt+Ctrl+I',
                 click () {
                     mainWindow.toggleDevTools();
                 }
             }]: [{
-                label       : 'Toggle &Full Screen',
+                label       : '全屏模式(&F)',
                 accelerator : 'F11',
                 click () {
                     mainWindow.setFullScreen(!mainWindow.isFullScreen());
                 }
             }]
         }, {
-            label   : 'Help',
+            label   : '帮助',
             submenu : [{
-                label : 'Learn More',
+                label : '了解更多',
                 click () {
-                    shell.openExternal('http://electron.atom.io');
+                    shell.openExternal('https://github.com/soulteary/fox');
                 }
             }, {
-                label : 'Documentation',
+                label : '查看文档',
                 click () {
-                    shell.openExternal('https://github.com/atom/electron/tree/master/docs#readme');
+                    shell.openExternal('https://github.com/soulteary/fox/tree/desktop-application');
                 }
             }, {
-                label : 'Community Discussions',
+                label : '社区讨论',
                 click () {
-                    shell.openExternal('https://discuss.atom.io/c/electron');
+                    shell.openExternal('https://github.com/soulteary/fox/issues');
                 }
             }, {
-                label : 'Search Issues',
+                label : '搜索ISSUE',
                 click () {
-                    shell.openExternal('https://github.com/atom/electron/issues');
+                    shell.openExternal('https://github.com/soulteary/fox/issues');
                 }
             }]
         }];

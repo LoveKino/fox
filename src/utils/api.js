@@ -1,15 +1,14 @@
 /* eslint strict: 0 */
 'use strict';
 
+import flow from 'noflow';
+import nokit from 'nokit';
+import bodyParser from 'body-parser';
 
-const flow = require('noflow');
-const nokit = require('nokit');
 const proxy = nokit.require('proxy');
 
-const userApi = require('../api/user');
-const caseApi = require('../api/case');
-
-proxy.body = require('./nokit.proxy.patch');
+import userApi from '../api/user';
+import caseApi from '../api/case';
 
 export default function (actionType) {
     const flowApp = flow();
@@ -17,7 +16,8 @@ export default function (actionType) {
     switch (actionType) {
         case 'start':
             flowApp.push(
-                proxy.body({maxLength : 1e6, parseJson : true}),    // 1MB
+                proxy.midToFlow(bodyParser.json()),
+
                 proxy.select(
                     {
                         url     : proxy.match('/user/:action'),
@@ -25,8 +25,9 @@ export default function (actionType) {
                         headers : {
                             'content-type' : /application\/json/i
                         }
-                    }, $ => $.body = userApi($.url.action.replace(/\.json/, ''), $.req)
+                    }, $ => $.body = userApi($.url.action.replace(/\.json/, ''), $.req.body)
                 ),
+
                 proxy.select(
                     {
                         url     : proxy.match('/case/:action'),
@@ -34,18 +35,19 @@ export default function (actionType) {
                         headers : {
                             'content-type' : /application\/json/i
                         }
-                    }, $ => $.body = caseApi($.url.action.replace(/\.json/, ''), $.req)
+                    }, $ => $.body = caseApi($.url.action.replace(/\.json/, ''), $.req.body)
                 ),
+
                 proxy.select({url : '/'}, proxy.static('./app'))
             );
 
-            flowApp.listen(3001);
+            flowApp.listen(8000);
             break;
         case 'stop':
             flowApp.close();
             break;
         default:
-
+            throw new Error('unknown server command.');
             break;
     }
 }

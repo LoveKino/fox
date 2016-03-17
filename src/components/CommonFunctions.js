@@ -32,7 +32,7 @@ export default class CommonFunctions extends Component {
                                         <span className="welcome-highlight"><Link to="/record">测试用例</Link></span>
                                     </summary>
                                     <div className="welcome-detail">
-                                        <p><img className="welcome-img" src="atom://welcome/assets/project.svg"/></p>
+                                        <p><img className="welcome-img" data-src="atom://welcome/assets/project.svg"/></p>
 
                                         <p>Fox可以帮助你完成自动化测试中常见的交互问题。</p>
 

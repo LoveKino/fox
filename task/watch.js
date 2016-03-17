@@ -2,6 +2,8 @@ const exec = require('child_process').exec;
 const fs = require('fs');
 const path = require('path');
 
+const nokit = require('nokit');
+
 const log = console.log.bind(console);
 
 var chokidar = require('chokidar');
@@ -74,7 +76,7 @@ watcher
         ) {
             exec(`./node_modules/.bin/babel ${filePath} --out-file ${filePath.replace(baseDir, distDir)}`, (err, stdout) => {
                 if (err) {
-                    log(`build error: ${err} ; file path: ${filePath} ; stdout: ${stdout}`);
+                    nokit.err(`build error: ${err} ; file path: ${filePath} ; stdout: ${stdout}`)
                 } else {
                     log(`[babel compile done] ${filePath.replace(baseDir, distDir)}`);
                 }

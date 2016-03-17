@@ -20,6 +20,7 @@ config.entry = [
     './src/static/module/tabs.less',
     './src/static/module/status-bar.less',
     './src/static/atom-dark-ui.less',
+    './src/static/module/record/index.less',
     './app/index'
 ];
 

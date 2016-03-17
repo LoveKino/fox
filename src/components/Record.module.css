@@ -2,6 +2,11 @@
     position: absolute;
     top: 0;
     left: 0;
+    z-index: 10;
+}
+
+.backButtonIcon {
+    color: #f0f0f0;
 }
 
 .caseListConatiner {
@@ -14,17 +19,27 @@
 }
 
 .caseContentContainer {
-    position: relative;
-    margin-left: 310px;
+    position: absolute;
+    left: 300px;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    padding: 1vh;
 }
 
 .casePreviewBoxContainer {
     background: #e0e0e0;
-    margin-bottom: 110px;
+    margin: 4vh 0 0;
+    height: 66vh;
 }
 
 .caseScriptSourceConatiner {
-    bottom: 0;
-    background: #fff;
-    height: 100px;
+    margin: 2vh 0 0;
+    height: 25vh;
+}
+
+.caseScriptSourceCode {
+    width: 100%;
+    height: 100%;
+    display: block;
 }
